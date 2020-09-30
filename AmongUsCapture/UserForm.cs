@@ -62,7 +62,7 @@ namespace AmongUsCapture
             {
                 Menu menu = new Menu();
                 MenuItem menu_item = new MenuItem("Autoscroll");
-                menu_item.Add(checkBox1);
+                menu_item.Add(_autoScrollMenuItem);
                 menu.ShowAll();
                 menu.PopupAtWidget(menu, Gravity.South, Gravity.East, null);
             }
@@ -98,7 +98,6 @@ namespace AmongUsCapture
             Settings.conInterface.WriteModuleTextColored("CHAT", Color.DarkKhaki, $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Sender}{NormalTextColor.ToTextColor()}: {e.Message}");
             //WriteLineToConsole($"[CHAT] {e.Sender}: {e.Message}");
         }
-        
         
         /*
          
@@ -179,7 +178,7 @@ namespace AmongUsCapture
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, "State changed to " + e.NewState);
         }
 
-        private void SubmitButton_Click(object sender, EventArgs e)
+        private void _connectCodeSubmitButton_Click(object sender, EventArgs e)
         {
             if (_connectCodeEntryField.TextLength == 6)
             {
@@ -366,7 +365,7 @@ namespace AmongUsCapture
                 
         }
 
-        private void CopyButton_Click(object sender, EventArgs e)
+        private void _gameCodeCopyButton_Click(object sender, EventArgs e)
         {
             if(!(_gameCodeEntryField.Text is null || _gameCodeEntryField.Text == ""))
             {
