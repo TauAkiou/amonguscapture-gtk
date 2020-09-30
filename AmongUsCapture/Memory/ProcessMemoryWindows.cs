@@ -13,7 +13,7 @@ namespace AmongUsCapture
             IsHooked = process != null && !process.HasExited;
             if (!IsHooked)
             {
-                Process[] processes = Process.GetProcessesByName(name);
+                Process[] processes = Process.GetProcessesByName("Among Us");
                 if (processes.Length > 0)
                 {
                     process = processes[0];

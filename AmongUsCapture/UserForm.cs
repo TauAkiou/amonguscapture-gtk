@@ -74,7 +74,7 @@ namespace AmongUsCapture
             {
                 Menu menu = new Menu();
                 MenuItem menu_item = new MenuItem("Autoscroll");
-                menu_item.Add(checkBox1);
+                menu_item.Add(_autoScrollMenuItem);
                 menu.ShowAll();
                 menu.PopupAtWidget(menu, Gravity.South, Gravity.East, null);
             }
@@ -154,7 +154,7 @@ namespace AmongUsCapture
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, "State changed to " + e.NewState);
         }
 
-        private void ConnectButton_Click(object sender, EventArgs e)
+        private void _connectCodeSubmitButton_Click(object sender, EventArgs e)
         {
 
             ConnectCodeBox.Enabled = false;
@@ -380,7 +380,7 @@ namespace AmongUsCapture
                 
         }
 
-        private void CopyButton_Click(object sender, EventArgs e)
+        private void _gameCodeCopyButton_Click(object sender, EventArgs e)
         {
             if(!(_gameCodeEntryField.Text is null || _gameCodeEntryField.Text == ""))
             {
