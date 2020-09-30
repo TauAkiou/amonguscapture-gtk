@@ -1,7 +1,9 @@
 namespace AmongUsCapture
 {
+    /*
     partial class UserForm
     {
+        
         /// <summary>
         /// Required designer variable.
         /// </summary>
@@ -72,7 +74,7 @@ namespace AmongUsCapture
             // 
             this.splitContainer1.Panel1.Controls.Add(this.UserSettings);
             // 
-            // splitContainer1.Panel2
+            // splitContainer1.Panel
             // 
             this.splitContainer1.Panel2.Controls.Add(this.ConsoleGroupBox);
             this.splitContainer1.Size = new System.Drawing.Size(824, 476);
@@ -338,7 +340,8 @@ namespace AmongUsCapture
         }
 
         #endregion
-
+        
+        
         private System.Windows.Forms.SplitContainer splitContainer1;
         private System.Windows.Forms.GroupBox UserSettings;
         private System.Windows.Forms.GroupBox ConsoleGroupBox;
@@ -357,5 +360,7 @@ namespace AmongUsCapture
         private System.Windows.Forms.Button GameCodeCopyButton;
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel3;
         private System.Windows.Forms.TextBox GameCodeBox;
+        
     }
+    */
 }

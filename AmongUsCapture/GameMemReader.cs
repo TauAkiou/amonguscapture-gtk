@@ -5,7 +5,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace AmongUsCapture
 {
@@ -56,9 +55,9 @@ namespace AmongUsCapture
         {
             while (true)
             {
-                if (!ProcessMemory.IsHooked)
-                {
-                    if (!ProcessMemory.HookProcess("Among Us"))
+                if (!ProcessMemory.IsHooked) {
+                    
+                    if (!ProcessMemory.HookProcess("Among Us.exe"))
                     {
                         Thread.Sleep(1000);
                         continue;
