@@ -37,7 +37,7 @@ namespace AmongUsCapture
             {
                 Menu menu = new Menu();
                 MenuItem menu_item = new MenuItem("Autoscroll");
-                menu_item.Add(checkBox1);
+                menu_item.Add(_autoScrollMenuItem);
                 menu.ShowAll();
                 menu.PopupAtWidget(menu, Gravity.South, Gravity.East, null);
             }
@@ -64,7 +64,6 @@ namespace AmongUsCapture
             Program.conInterface.WriteTextFormatted($"[§6CHAT§f] {PlayerColorToColorCode(e.Color)}{e.Sender}§f: §f{e.Message}§f");
             //WriteLineToConsole($"[CHAT] {e.Sender}: {e.Message}");
         }
-        
         
         /*
          
@@ -131,6 +130,7 @@ namespace AmongUsCapture
         private void UserForm_PlayerChanged(object sender, PlayerChangedEventArgs e)
         {
             Program.conInterface.WriteTextFormatted($"[§6PlayerChange§f] {PlayerColorToColorCode(e.Color)}{e.Name}§f: §f{e.Action}§f");
+            this.ShowAll();
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, e.Name + ": " + e.Action);
         }
 
@@ -142,16 +142,18 @@ namespace AmongUsCapture
                 return false;
             });
             Program.conInterface.WriteTextFormatted($"[§aGameMemReader§f] State changed to §b{e.NewState}§f");
+            this.ShowAll();
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, "State changed to " + e.NewState);
         }
 
-        private void SubmitButton_Click(object sender, EventArgs e)
+        private void _connectCodeSubmitButton_Click(object sender, EventArgs e)
         {
             if (_connectCodeEntryField.TextLength == 6)
             {
                 clientSocket.SendConnectCode(_connectCodeEntryField.Text);
                 //ConnectCodeBox.Enabled = false;
                 //SubmitButton.Enabled = false;
+                this.ShowAll();
             }
         }
 
@@ -193,6 +195,7 @@ namespace AmongUsCapture
             {
                 WriteLineFormatted($"{color} = §{color}{color}");
             }
+            this.ShowAll();
         }
 
         public void WriteConsoleLineFormatted(String moduleName, Color moduleColor, String message)
@@ -202,6 +205,7 @@ namespace AmongUsCapture
             AppendColoredTextToConsole("[", normalColor, false);
             AppendColoredTextToConsole(moduleName, moduleColor, false);
             AppendColoredTextToConsole($"]: {message}", normalColor, true);
+            this.ShowAll();
         }
 
         public void AppendColoredTextToConsole(String line, Color color, bool addNewLine = false)
@@ -217,6 +221,7 @@ namespace AmongUsCapture
                     _consoleTextView.Buffer.PlaceCursor(iter);
                 return false;
                 });
+                this.ShowAll();
             }
         }
 
@@ -231,6 +236,7 @@ namespace AmongUsCapture
                     _consoleTextView.Buffer.PlaceCursor(iter);
                     return false;
                 });
+                this.ShowAll();
             }
         }
         private string PlayerColorToColorCode(PlayerColor pColor)
@@ -321,12 +327,13 @@ namespace AmongUsCapture
                     AppendColoredTextToConsole("", Color.White, true);
                     return false;
                 });
-                
+                this.ShowAll();
+
             }
                 
         }
 
-        private void CopyButton_Click(object sender, EventArgs e)
+        private void _gameCodeCopyButton_Click(object sender, EventArgs e)
         {
             if(!(_gameCodeEntryField.Text is null || _gameCodeEntryField.Text == ""))
             {
