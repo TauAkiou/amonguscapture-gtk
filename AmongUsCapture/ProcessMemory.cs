@@ -24,6 +24,7 @@ namespace AmongUsCapture
                     if (process != null && !process.HasExited)
                     {
                         bool flag;
+                        
                         WinAPI.IsWow64Process(process.Handle, out flag);
                         is64Bit = Environment.Is64BitOperatingSystem && !flag;
 
@@ -157,6 +158,10 @@ namespace AmongUsCapture
             [DllImport("psapi.dll", SetLastError = true)]
             [return: MarshalAs(UnmanagedType.Bool)]
             public static extern bool GetModuleInformation(IntPtr hProcess, IntPtr hModule, out ModuleInfo lpmodinfo, uint cb);
+        }
+
+        private static class LinuxAPI
+        {
         }
         public class Module
         {

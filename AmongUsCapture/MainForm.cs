@@ -5,23 +5,26 @@ using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
-using System.Windows.Forms;
+using Gtk;
 
 namespace AmongUsCapture
 {
-    public partial class MainForm : Form
+    public partial class MainForm : Window
     {
-        public MainForm()
+        public MainForm() : base("MainForm")
         {
-            InitializeComponent();
+            InitializeWindow();
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
         }
 
         private void GameStateChangedHandler(object sender, GameStateChangedEventArgs e)
         {
-            this.playerCountLabel.BeginInvoke((MethodInvoker) delegate {
-                playerCountLabel.Text = e.NewState.ToString();
+            
+            GLib.Idle.Add( delegate {
+                label2.Text = e.NewState.ToString();
+                return false;
             });
+            
         }
     }
 

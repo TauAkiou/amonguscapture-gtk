@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using System.Windows.Forms;
+using Gtk;
 
 namespace AmongUsCapture
 {
@@ -18,22 +18,31 @@ namespace AmongUsCapture
         [STAThread]
         static void Main()
         {
+            var appstate = new Application("org.AmongUsCapture.AmongUsCaptureUtil", GLib.ApplicationFlags.None);
+            appstate.Register(GLib.Cancellable.Current);
+            Application.Init();
             if(doConsole)
             {
-                AllocConsole(); // needs to be the first call in the program to prevent weird bugs
+                //AllocConsole(); // needs to be the first call in the program to prevent weird bugs
             }
+            /* This is winforms stuff and doesn't apply to GTK.
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+            */
+            
+            
             ClientSocket socket = new ClientSocket();
-            var form = new UserForm(socket);
+            var windowbuilder = new Builder();
+            var form = new UserForm(windowbuilder, socket);
             Settings.conInterface = new FormConsole(form); //Create the Form Console interface. 
             Task.Factory.StartNew(() => socket.Connect(Settings.PersistentSettings.host)); //synchronously force the socket to connect
             Task.Factory.StartNew(() => GameMemReader.getInstance().RunLoop()); // run loop in background
-
-            //AllocConsole();
-            Application.Run(form);
+            //(new DebugConsole(debugGui)).Run();
             
+            appstate.AddWindow(form);
+            form.ShowAll();
+            Application.Run();
             //test
         }
 

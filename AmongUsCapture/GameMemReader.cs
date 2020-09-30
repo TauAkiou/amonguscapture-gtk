@@ -5,9 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using TextColorLibrary;
-
 namespace AmongUsCapture
 {
     public enum GameState
@@ -50,9 +48,9 @@ namespace AmongUsCapture
         {
             while (true)
             {
-                if (!ProcessMemory.IsHooked)
-                {
-                    if (!ProcessMemory.HookProcess("Among Us"))
+                if (!ProcessMemory.IsHooked) {
+                    
+                    if (!ProcessMemory.HookProcess("Among Us.exe"))
                     {
                         Thread.Sleep(1000);
                         continue;
