@@ -47,7 +47,6 @@ namespace AmongUsCapture
         public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
         {
             //builder.Autoconnect(this);
-            SetIconFromFile("icon.ico");
             clientSocket = sock;
             InitializeWindow();
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
