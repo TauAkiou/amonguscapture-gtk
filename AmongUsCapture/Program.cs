@@ -23,7 +23,7 @@ namespace AmongUsCapture
             Application.Init();
             if(doConsole)
             {
-                //AllocConsole(); // needs to be the first call in the program to prevent weird bugs
+                AllocConsole(); // needs to be the first call in the program to prevent weird bugs
             }
             /* This is winforms stuff and doesn't apply to GTK.
             Application.SetHighDpiMode(HighDpiMode.SystemAware);
@@ -42,16 +42,21 @@ namespace AmongUsCapture
             //(new DebugConsole(debugGui)).Run();
             
             appstate.AddWindow(form);
+            form.DeleteEvent += (object o, DeleteEventArgs e) =>
+            {
+                Application.Quit();
+            };
+
             form.ShowAll();
             Application.Run();
             //test
         }
 
-        /*
+        
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
-        */
+        
 
     }
 }
