@@ -30,16 +30,18 @@ namespace AmongUsCapture
 
         private Frame _consoleParentFrame;
         private VBox _consoleLayoutContainer;
+        private ScrolledWindow _consoleScrolledWindow;
         private TextView _consoleTextView;
-        
-        
+        private Menu _consoleContextMenu;
+
+
         private Box _currentStateContainer;
         private Frame _currentStateFrame;
-        
         private Label _currentStateLabel;
-        private CheckButton checkBox1;
-        private Menu contextMenu;
-        private MenuItem autoscroll;
+
+
+        private CheckButton _autoScrollCheckbox;
+        private MenuItem _autoScrollMenuItem;
 
 
 
@@ -74,14 +76,15 @@ namespace AmongUsCapture
             _connectCodeEntryField = new Entry();
 
             // Right Side Console
+            _consoleScrolledWindow = new ScrolledWindow();
             _consoleLayoutContainer = new VBox();
             _consoleParentFrame = new Frame();
             _consoleTextView = new TextView();
             
             
-            checkBox1 = new CheckButton();
-            contextMenu = new Menu();
-            autoscroll = new MenuItem();
+            _autoScrollCheckbox = new CheckButton();
+            _consoleContextMenu = new Menu();
+            _autoScrollMenuItem = new MenuItem();
   
 
 
@@ -91,7 +94,6 @@ namespace AmongUsCapture
             _primaryWindowPane.Position = 180;
             _primaryWindowPane.TooltipText = "paneContainer1";
 
-            // paneContainer1 panels
             _primaryWindowPane.Pack1(_primaryWindowLeftContainer, true, false);
             _primaryWindowPane.Pack2(_consoleParentFrame, true, false);
             
@@ -149,6 +151,7 @@ namespace AmongUsCapture
             _gameCodeCopyButton.SetSizeRequest(20, 25);
             _gameCodeCopyButton.Name = "_gameModeCopyButton";
             _gameCodeCopyButton.Label = "Copy";
+            _gameCodeCopyButton.Clicked += _gameCodeCopyButton_Click;
 
             _gameCodeEntryField.Xalign = (float) 0.5;
             _gameCodeEntryField.SetSizeRequest(50, 20);
@@ -174,6 +177,7 @@ namespace AmongUsCapture
             _connectCodeSubmitButton.Name = "_connectCodeSubmitButton";
             _connectCodeSubmitButton.Label = "Submit";
             _connectCodeSubmitButton.SetSizeRequest(30, 20);
+            _connectCodeSubmitButton.Clicked += _connectCodeSubmitButton_Click;
             
             // Right Side
             _consoleParentFrame.Name = "_consoleParentFrame";
@@ -181,8 +185,12 @@ namespace AmongUsCapture
             _consoleParentFrame.Add(_consoleLayoutContainer);
 
             _consoleLayoutContainer.Name = "_consoleLayoutContainer";
-            _consoleLayoutContainer.PackStart(_consoleTextView, true, true, 5);
+            _consoleLayoutContainer.PackStart(_consoleScrolledWindow, true, true, 5);
             _consoleLayoutContainer.Margin = 5;
+
+            _consoleScrolledWindow.Name = "_consoleScrolledWindow";
+            _consoleScrolledWindow.Add(_consoleTextView);
+
 
             _consoleTextView.Name = "_consoleTextView";
             _consoleTextView.Editable = false;
