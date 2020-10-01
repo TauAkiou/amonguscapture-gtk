@@ -61,6 +61,4 @@ namespace AmongUsCapture
             public IntPtr EntryPoint;
         }
     }
-
-
 }
