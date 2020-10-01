@@ -18,16 +18,13 @@
   </ItemGroup>
 
   <ItemGroup>
-<<<<<<< HEAD
     <Compile Update="MainForm.Gtk.cs">
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Update="Userform.Gtk.cs">
       <DependentUpon>UserForm.cs</DependentUpon>
     </Compile>
-=======
     <Folder Include="TextColorLibrary\" />
->>>>>>> upstream/master
   </ItemGroup>
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>

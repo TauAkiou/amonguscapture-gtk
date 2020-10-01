@@ -5,11 +5,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-<<<<<<< HEAD:AmongUsCapture/Memory/GameMemReader.cs
-=======
-using System.Windows.Forms;
 using TextColorLibrary;
->>>>>>> upstream/master:AmongUsCapture/GameMemReader.cs
 
 namespace AmongUsCapture
 {

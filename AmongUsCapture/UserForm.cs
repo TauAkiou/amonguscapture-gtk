@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
-<<<<<<< HEAD
 using Gdk;
 using GLib;
 using Gtk;
@@ -11,22 +10,18 @@ using Color = System.Drawing.Color;
 using Menu = Gtk.Menu;
 using MenuItem = Gtk.MenuItem;
 using Window = Gtk.Window;
-=======
-using System.Windows.Forms;
 using TextColorLibrary;
->>>>>>> upstream/master
+
 
 namespace AmongUsCapture
 {
     public partial class UserForm : Window
     {
         private ClientSocket clientSocket;
-<<<<<<< HEAD
         private static Atom _atom = Atom.Intern("CLIPBOARD", false);
         private Clipboard _clipboard = Clipboard.Get(_atom);
 
         public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
-=======
         public static Color NormalTextColor = Color.Black;
         private Color Rainbow(float progress)
         {
@@ -51,7 +46,6 @@ namespace AmongUsCapture
             }
         }
         public UserForm(ClientSocket sock)
->>>>>>> upstream/master
         {
             //builder.Autoconnect(this);
             SetIconFromFile("icon.ico");
@@ -172,12 +166,10 @@ namespace AmongUsCapture
 
         private void UserForm_PlayerChanged(object sender, PlayerChangedEventArgs e)
         {
-<<<<<<< HEAD
-            Program.conInterface.WriteTextFormatted($"[§6PlayerChange§f] {PlayerColorToColorCode(e.Color)}{e.Name}§f: §f{e.Action}§f");
-            this.ShowAll();
-=======
+
             Settings.conInterface.WriteModuleTextColored("PlayerChange", Color.DarkKhaki, $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Name}{NormalTextColor.ToTextColor()}: {e.Action}");
->>>>>>> upstream/master
+            this.ShowAll();
+            
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, e.Name + ": " + e.Action);
         }
 
@@ -188,12 +180,9 @@ namespace AmongUsCapture
                 _currentStateLabel.Text = e.NewState.ToString();
                 return false;
             });
-<<<<<<< HEAD
-            Program.conInterface.WriteTextFormatted($"[§aGameMemReader§f] State changed to §b{e.NewState}§f");
-            this.ShowAll();
-=======
+
             Settings.conInterface.WriteModuleTextColored("GameMemReader", Color.Lime, $"State changed to {Color.Cyan.ToTextColor()}{e.NewState}");
->>>>>>> upstream/master
+            this.ShowAll();
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, "State changed to " + e.NewState);
         }
 
@@ -220,54 +209,22 @@ namespace AmongUsCapture
 
         private void TestFillConsole(int entries) //Helper test method to see if filling console works.
         {
-<<<<<<< HEAD
-            List<String> colors = new List<string>
-            {
-                "0",
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "a",
-                "b",
-                "c",
-                "d",
-                "e",
-                "f",
-                "o",
-                "n",
-                "r"
-            };
-            foreach (var color in colors)
-            {
-                WriteLineFormatted($"{color} = §{color}{color}");
-            }
-            this.ShowAll();
-=======
+
             //for (int i = 0; i < entries; i++)
             //{
             //    this.WriteConsoleLineFormatted("Rainbow", Rainbow((float)i / entries), getRainbowText("Wow! " + Rainbow((float)i / entries).ToString()));
             //};
             //this.WriteColoredText(getRainbowText("This is a Pre-Release from Carbon's branch."));
->>>>>>> upstream/master
+
         }
 
         public void WriteConsoleLineFormatted(String moduleName, Color moduleColor, String message)
         {
             //Outputs a message like this: [{ModuleName}]: {Message}
-<<<<<<< HEAD
-            var normalColor = Color.White;
-            AppendColoredTextToConsole("[", normalColor, false);
-            AppendColoredTextToConsole(moduleName, moduleColor, false);
-            AppendColoredTextToConsole($"]: {message}", normalColor, true);
+
+           this.WriteColoredText($"[{moduleColor.ToTextColor()}{moduleName}{NormalTextColor.ToTextColor()}]: {message}");
             this.ShowAll();
-=======
-            this.WriteColoredText($"[{moduleColor.ToTextColor()}{moduleName}{NormalTextColor.ToTextColor()}]: {message}");
+ 
         }
 
         public void WriteColoredText(String ColoredText)
@@ -277,7 +234,6 @@ namespace AmongUsCapture
                 this.AppendColoredTextToConsole(part.text, part.textColor, false);
             }
             this.AppendColoredTextToConsole("", Color.White, true);
->>>>>>> upstream/master
         }
 
         public void AppendColoredTextToConsole(String line, Color color, bool addNewLine = false)
