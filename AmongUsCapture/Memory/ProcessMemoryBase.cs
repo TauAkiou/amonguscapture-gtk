@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
@@ -44,3 +45,12 @@ namespace AmongUsCapture
 
 
 }
+=======
+namespace AmongUsCapture
+{
+    public class ProcessMemoryBase
+    {
+        
+    }
+}
+>>>>>>> 7ab7742... Organized and fixed names for memory reader.
