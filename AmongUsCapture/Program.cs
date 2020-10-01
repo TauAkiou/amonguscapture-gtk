@@ -29,6 +29,11 @@ namespace AmongUsCapture
             */
             
             ClientSocket socket = new ClientSocket();
+
+            string hostPath = "host.txt";
+          
+            //TODO make proper properties file
+            string host = File.Exists(hostPath) ? File.ReadAllText(hostPath) : "http://localhost:8123";
             var windowbuilder = new Builder();
             var form = new UserForm(windowbuilder, socket);
             Settings.conInterface = new FormConsole(form); //Create the Form Console interface. 
