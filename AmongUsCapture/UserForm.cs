@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using Gdk;
@@ -46,6 +47,8 @@ namespace AmongUsCapture
         public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
         {
             //builder.Autoconnect(this);
+            var pixbuf = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
+            Icon = pixbuf;
             clientSocket = sock;
             InitializeWindow();
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
@@ -65,6 +68,8 @@ namespace AmongUsCapture
                 menu.ShowAll();
                 menu.PopupAtWidget(menu, Gravity.South, Gravity.East, null);
             }
+
+            NormalTextColor = Color.White;
         }
         
         private void OnJoinedLobby(object sender, LobbyEventArgs e)
