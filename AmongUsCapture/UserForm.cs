@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using Gdk;
@@ -20,8 +21,7 @@ namespace AmongUsCapture
         private ClientSocket clientSocket;
         private static Atom _atom = Atom.Intern("CLIPBOARD", false);
         private Clipboard _clipboard = Clipboard.Get(_atom);
-
-        public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
+        
         public static Color NormalTextColor = Color.Black;
         private Color Rainbow(float progress)
         {
@@ -45,10 +45,11 @@ namespace AmongUsCapture
                     return Color.FromArgb(255, 255, 0, descending);
             }
         }
-        public UserForm(ClientSocket sock)
+        public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
         {
             //builder.Autoconnect(this);
-            SetIconFromFile("icon.ico");
+            var pixbuf = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
+            Icon = pixbuf;
             clientSocket = sock;
             InitializeWindow();
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
@@ -68,7 +69,8 @@ namespace AmongUsCapture
                 menu.ShowAll();
                 menu.PopupAtWidget(menu, Gravity.South, Gravity.East, null);
             }
-            NormalTextColor = DarkTheme() ? Color.White : Color.Black;
+
+            NormalTextColor = Color.White;
         }
         
         private void OnJoinedLobby(object sender, LobbyEventArgs e)

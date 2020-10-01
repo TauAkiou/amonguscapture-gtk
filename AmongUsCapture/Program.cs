@@ -40,8 +40,8 @@ namespace AmongUsCapture
             string host = File.Exists(hostPath) ? File.ReadAllText(hostPath) : "http://localhost:8123";
             var windowbuilder = new Builder();
             var form = new UserForm(windowbuilder, socket);
-            conInterface = new FormConsole(form); //Create the Form Console interface. 
-            Task.Factory.StartNew(() => socket.Connect(host)); //synchronously force the socket to connect
+            Settings.conInterface = new FormConsole(form); //Create the Form Console interface. 
+            Task.Factory.StartNew(() => socket.Connect(Settings.PersistentSettings.host)); //synchronously force the socket to connect
             Task.Factory.StartNew(() => GameMemReader.getInstance().RunLoop()); // run loop in background
             //(new DebugConsole(debugGui)).Run();
             
@@ -53,14 +53,8 @@ namespace AmongUsCapture
 
             form.ShowAll();
             Application.Run();
-            var form = new UserForm(socket);
-            Settings.conInterface = new FormConsole(form); //Create the Form Console interface. 
-            Task.Factory.StartNew(() => socket.Connect(Settings.PersistentSettings.host)); //synchronously force the socket to connect
-            Task.Factory.StartNew(() => GameMemReader.getInstance().RunLoop()); // run loop in background
 
             //AllocConsole();
-            Application.Run(form);
-            
             //test
         }
 
