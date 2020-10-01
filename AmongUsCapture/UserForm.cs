@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
+<<<<<<< HEAD
 using Gdk;
 using GLib;
 using Gtk;
@@ -9,16 +11,47 @@ using Color = System.Drawing.Color;
 using Menu = Gtk.Menu;
 using MenuItem = Gtk.MenuItem;
 using Window = Gtk.Window;
+=======
+using System.Windows.Forms;
+using TextColorLibrary;
+>>>>>>> upstream/master
 
 namespace AmongUsCapture
 {
     public partial class UserForm : Window
     {
         private ClientSocket clientSocket;
+<<<<<<< HEAD
         private static Atom _atom = Atom.Intern("CLIPBOARD", false);
         private Clipboard _clipboard = Clipboard.Get(_atom);
 
         public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
+=======
+        public static Color NormalTextColor = Color.Black;
+        private Color Rainbow(float progress)
+        {
+            float div = (Math.Abs(progress % 1) * 6);
+            int ascending = (int)((div % 1) * 255);
+            int descending = 255 - ascending;
+
+            switch ((int)div)
+            {
+                case 0:
+                    return Color.FromArgb(255, 255, ascending, 0);
+                case 1:
+                    return Color.FromArgb(255, descending, 255, 0);
+                case 2:
+                    return Color.FromArgb(255, 0, 255, ascending);
+                case 3:
+                    return Color.FromArgb(255, 0, descending, 255);
+                case 4:
+                    return Color.FromArgb(255, ascending, 0, 255);
+                default: // case 5:
+                    return Color.FromArgb(255, 255, 0, descending);
+            }
+        }
+        public UserForm(ClientSocket sock)
+>>>>>>> upstream/master
         {
             //builder.Autoconnect(this);
             SetIconFromFile("icon.ico");
@@ -41,6 +74,7 @@ namespace AmongUsCapture
                 menu.ShowAll();
                 menu.PopupAtWidget(menu, Gravity.South, Gravity.East, null);
             }
+            NormalTextColor = DarkTheme() ? Color.White : Color.Black;
         }
         
         private void OnJoinedLobby(object sender, LobbyEventArgs e)
@@ -55,13 +89,22 @@ namespace AmongUsCapture
         
         private void OnLoad(object sender, EventArgs e)
         {
-            //TestFillConsole(100);
+            TestFillConsole(25);
+        }
+
+        private string getRainbowText(string nonRainbow)
+        {
+            string OutputString = "";
+            for (int i = 0; i < nonRainbow.Length; i++)
+            {
+                OutputString += Rainbow((float)i / nonRainbow.Length).ToTextColor() + nonRainbow[i];
+            }
+            return OutputString;
         }
 
         private void OnChatMessageAdded(object sender, ChatMessageEventArgs e)
         {
-
-            Program.conInterface.WriteTextFormatted($"[§6CHAT§f] {PlayerColorToColorCode(e.Color)}{e.Sender}§f: §f{e.Message}§f");
+            Settings.conInterface.WriteModuleTextColored("CHAT", Color.DarkKhaki, $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Sender}{NormalTextColor.ToTextColor()}: {e.Message}");
             //WriteLineToConsole($"[CHAT] {e.Sender}: {e.Message}");
         }
         
@@ -129,8 +172,12 @@ namespace AmongUsCapture
 
         private void UserForm_PlayerChanged(object sender, PlayerChangedEventArgs e)
         {
+<<<<<<< HEAD
             Program.conInterface.WriteTextFormatted($"[§6PlayerChange§f] {PlayerColorToColorCode(e.Color)}{e.Name}§f: §f{e.Action}§f");
             this.ShowAll();
+=======
+            Settings.conInterface.WriteModuleTextColored("PlayerChange", Color.DarkKhaki, $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Name}{NormalTextColor.ToTextColor()}: {e.Action}");
+>>>>>>> upstream/master
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, e.Name + ": " + e.Action);
         }
 
@@ -141,8 +188,12 @@ namespace AmongUsCapture
                 _currentStateLabel.Text = e.NewState.ToString();
                 return false;
             });
+<<<<<<< HEAD
             Program.conInterface.WriteTextFormatted($"[§aGameMemReader§f] State changed to §b{e.NewState}§f");
             this.ShowAll();
+=======
+            Settings.conInterface.WriteModuleTextColored("GameMemReader", Color.Lime, $"State changed to {Color.Cyan.ToTextColor()}{e.NewState}");
+>>>>>>> upstream/master
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, "State changed to " + e.NewState);
         }
 
@@ -169,6 +220,7 @@ namespace AmongUsCapture
 
         private void TestFillConsole(int entries) //Helper test method to see if filling console works.
         {
+<<<<<<< HEAD
             List<String> colors = new List<string>
             {
                 "0",
@@ -196,16 +248,36 @@ namespace AmongUsCapture
                 WriteLineFormatted($"{color} = §{color}{color}");
             }
             this.ShowAll();
+=======
+            //for (int i = 0; i < entries; i++)
+            //{
+            //    this.WriteConsoleLineFormatted("Rainbow", Rainbow((float)i / entries), getRainbowText("Wow! " + Rainbow((float)i / entries).ToString()));
+            //};
+            //this.WriteColoredText(getRainbowText("This is a Pre-Release from Carbon's branch."));
+>>>>>>> upstream/master
         }
 
         public void WriteConsoleLineFormatted(String moduleName, Color moduleColor, String message)
         {
             //Outputs a message like this: [{ModuleName}]: {Message}
+<<<<<<< HEAD
             var normalColor = Color.White;
             AppendColoredTextToConsole("[", normalColor, false);
             AppendColoredTextToConsole(moduleName, moduleColor, false);
             AppendColoredTextToConsole($"]: {message}", normalColor, true);
             this.ShowAll();
+=======
+            this.WriteColoredText($"[{moduleColor.ToTextColor()}{moduleName}{NormalTextColor.ToTextColor()}]: {message}");
+        }
+
+        public void WriteColoredText(String ColoredText)
+        {
+            foreach (var part in TextColor.toParts(ColoredText))
+            {
+                this.AppendColoredTextToConsole(part.text, part.textColor, false);
+            }
+            this.AppendColoredTextToConsole("", Color.White, true);
+>>>>>>> upstream/master
         }
 
         public void AppendColoredTextToConsole(String line, Color color, bool addNewLine = false)
@@ -238,6 +310,27 @@ namespace AmongUsCapture
                 });
                 this.ShowAll();
             }
+        }
+
+        private Color PlayerColorToColorOBJ(PlayerColor pColor)
+        {
+            Color OutputCode = Color.White;
+            switch (pColor)
+            {
+                case PlayerColor.Red: OutputCode = Color.Red; break;
+                case PlayerColor.Blue: OutputCode = Color.RoyalBlue; break;
+                case PlayerColor.Green: OutputCode = Color.Green; break;
+                case PlayerColor.Pink: OutputCode = Color.Magenta; break;
+                case PlayerColor.Orange: OutputCode = Color.Orange; break;
+                case PlayerColor.Yellow: OutputCode = Color.Yellow; break;
+                case PlayerColor.Black: OutputCode = Color.Gray; break;
+                case PlayerColor.White: OutputCode = Color.White; break;
+                case PlayerColor.Purple: OutputCode = Color.MediumPurple; break;
+                case PlayerColor.Brown: OutputCode = Color.SaddleBrown; break;
+                case PlayerColor.Cyan: OutputCode = Color.Cyan; break;
+                case PlayerColor.Lime: OutputCode = Color.Lime; break;
+            }
+            return OutputCode;
         }
         private string PlayerColorToColorCode(PlayerColor pColor)
         {

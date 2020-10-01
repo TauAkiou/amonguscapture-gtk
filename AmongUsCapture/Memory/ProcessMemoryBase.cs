@@ -1,6 +1,6 @@
 namespace AmongUsCapture
 {
-    public class ProcessMemoryBase
+    public interface IProcessMemory
     {
         
     }
