@@ -20,17 +20,23 @@ namespace AmongUsCapture.ConsoleTypes
 
         public void WriteLine(string str)
         {
+            
             form.WriteLineToConsole(str);
+            
         }
 
         public void WriteModuleTextColored(string ModuleName, Color moduleColor, string text)
         {
+            
             form.WriteConsoleLineFormatted(ModuleName, moduleColor, text);
+            
         }
 
         public void WriteTextFormatted(string text, bool acceptNewLines = true)
         {
+            
             form.WriteLineFormatted(text, acceptNewLines);
+            
         }
     }
 }

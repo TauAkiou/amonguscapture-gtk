@@ -3,14 +3,22 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
-using System.Windows.Forms;
+using Gdk;
+using GLib;
+using Gtk;
+using Color = System.Drawing.Color;
+using Menu = Gtk.Menu;
+using MenuItem = Gtk.MenuItem;
+using Window = Gtk.Window;
 using TextColorLibrary;
 
 namespace AmongUsCapture
 {
-    public partial class UserForm : Form
+    public partial class UserForm : Window
     {
         private ClientSocket clientSocket;
+        private static Atom _atom = Atom.Intern("CLIPBOARD", false);
+        private Clipboard _clipboard = Clipboard.Get(_atom);
         public static Color NormalTextColor = Color.Black;
         private Color Rainbow(float progress)
         {
@@ -34,31 +42,42 @@ namespace AmongUsCapture
                     return Color.FromArgb(255, 255, 0, descending);
             }
         }
-        public UserForm(ClientSocket sock)
+      
+        public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
         {
+            //builder.Autoconnect(this);
+            SetIconFromFile("icon.ico");
             clientSocket = sock;
-            InitializeComponent();
+            InitializeWindow();
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
             GameMemReader.getInstance().PlayerChanged += UserForm_PlayerChanged;
             GameMemReader.getInstance().ChatMessageAdded += OnChatMessageAdded;
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
-
-            if (DarkTheme())
-            {
-                EnableDarkTheme();
-            }
-            NormalTextColor = DarkTheme() ? Color.White : Color.Black;
-        }
-
-        private void OnJoinedLobby(object sender, LobbyEventArgs e)
-        {
-            GameCodeBox.BeginInvoke((MethodInvoker)delegate
-            {
-                GameCodeBox.Text = e.LobbyCode;
-            });
             
         }
 
+        private void consoleTextView_OnRightClick(object o, ButtonPressEventArgs e)
+        {
+            if (e.Event.Button == 3)
+            {
+                Menu menu = new Menu();
+                MenuItem menu_item = new MenuItem("Autoscroll");
+                menu_item.Add(checkBox1);
+                menu.ShowAll();
+                menu.PopupAtWidget(menu, Gravity.South, Gravity.East, null);
+            }
+        }
+        
+        private void OnJoinedLobby(object sender, LobbyEventArgs e)
+        {
+            Idle.Add(delegate
+            {
+                _gameCodeEntryField.Text = e.LobbyCode;
+                return false;
+            });
+
+        }
+        
         private void OnLoad(object sender, EventArgs e)
         {
             TestFillConsole(25);
@@ -79,7 +98,14 @@ namespace AmongUsCapture
             Settings.conInterface.WriteModuleTextColored("CHAT", Color.DarkKhaki, $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Sender}{NormalTextColor.ToTextColor()}: {e.Message}");
             //WriteLineToConsole($"[CHAT] {e.Sender}: {e.Message}");
         }
-
+        
+        
+        /*
+         
+         /* GTK uses its own theming, so if you have a dark theme it will be used
+            automagically. */
+         
+        /*
         private bool DarkTheme()
         {
             bool is_dark_mode = false;
@@ -134,6 +160,7 @@ namespace AmongUsCapture
             BackColor = DarkGrey;
             ForeColor = White;
         }
+        */
 
         private void UserForm_PlayerChanged(object sender, PlayerChangedEventArgs e)
         {
@@ -143,9 +170,10 @@ namespace AmongUsCapture
 
         private void GameStateChangedHandler(object sender, GameStateChangedEventArgs e)
         {
-            this.CurrentState.BeginInvoke((MethodInvoker)delegate
+            Idle.Add(delegate
             {
-                CurrentState.Text = e.NewState.ToString();
+                _currentStateLabel.Text = e.NewState.ToString();
+                return false;
             });
             Settings.conInterface.WriteModuleTextColored("GameMemReader", Color.Lime, $"State changed to {Color.Cyan.ToTextColor()}{e.NewState}");
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, "State changed to " + e.NewState);
@@ -153,21 +181,22 @@ namespace AmongUsCapture
 
         private void SubmitButton_Click(object sender, EventArgs e)
         {
-            if (ConnectCodeBox.TextLength == 6)
+            if (_connectCodeEntryField.TextLength == 6)
             {
-                clientSocket.SendConnectCode(ConnectCodeBox.Text);
+                clientSocket.SendConnectCode(_connectCodeEntryField.Text);
                 //ConnectCodeBox.Enabled = false;
                 //SubmitButton.Enabled = false;
             }
         }
 
         private void ConsoleTextBox_TextChanged(object sender, EventArgs e)
-        {
+        { /*
             if (AutoScrollMenuItem.Checked)
             {
                 ConsoleTextBox.SelectionStart = ConsoleTextBox.Text.Length;
                 ConsoleTextBox.ScrollToCaret();
             }
+            */
         }
 
         private void TestFillConsole(int entries) //Helper test method to see if filling console works.
@@ -196,28 +225,30 @@ namespace AmongUsCapture
 
         public void AppendColoredTextToConsole(String line, Color color, bool addNewLine = false)
         {
-            if (!(ConsoleTextBox is null))
+            if (!(_consoleTextView is null))
             {
-                ConsoleTextBox.BeginInvoke((MethodInvoker)delegate
+                Idle.Add(delegate
                 {
-                    ConsoleTextBox.SuspendLayout();
-                    ConsoleTextBox.SelectionColor = color;
-                    ConsoleTextBox.AppendText(addNewLine
+                    var iter = _consoleTextView.Buffer.EndIter;
+                    _consoleTextView.Buffer.Insert(ref iter, addNewLine
                         ? $"{line}{Environment.NewLine}"
                         : line);
-                    ConsoleTextBox.ScrollToCaret();
-                    ConsoleTextBox.ResumeLayout();
+                    _consoleTextView.Buffer.PlaceCursor(iter);
+                return false;
                 });
             }
         }
 
         public void WriteLineToConsole(String line)
         {
-            if (!(ConsoleTextBox is null))
+            if (!(_consoleTextView is null))
             {
-                ConsoleTextBox.BeginInvoke((MethodInvoker)delegate
+                Idle.Add(delegate
                 {
-                    ConsoleTextBox.AppendText(line + "\n");
+                    var iter = _consoleTextView.Buffer.EndIter;
+                    _consoleTextView.Buffer.Insert(ref iter,line + "\n");
+                    _consoleTextView.Buffer.PlaceCursor(iter);
+                    return false;
                 });
             }
         }
@@ -277,9 +308,9 @@ namespace AmongUsCapture
 
         public void WriteLineFormatted(string str, bool acceptnewlines = true)
         {
-            if (!(ConsoleTextBox is null))
+            if (!(_consoleTextView is null))
             {
-                ConsoleTextBox.BeginInvoke((MethodInvoker)delegate
+                Idle.Add(delegate
                 {
                     if (!String.IsNullOrEmpty(str))
                     {
@@ -328,6 +359,7 @@ namespace AmongUsCapture
                         }
                     }
                     AppendColoredTextToConsole("", Color.White, true);
+                    return false;
                 });
                 
             }
@@ -336,13 +368,13 @@ namespace AmongUsCapture
 
         private void CopyButton_Click(object sender, EventArgs e)
         {
-            if(!(this.GameCodeBox.Text is null || this.GameCodeBox.Text == ""))
+            if(!(_gameCodeEntryField.Text is null || _gameCodeEntryField.Text == ""))
             {
-                System.Windows.Forms.Clipboard.SetText(this.GameCodeBox.Text);
+                _clipboard.Text = _gameCodeEntryField.Text;
             } 
            
         }
-
+    
     }
 
 }

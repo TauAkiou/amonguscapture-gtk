@@ -7,9 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using TextColorLibrary;
-
 namespace AmongUsCapture
 {
     public enum GameState
@@ -21,7 +19,6 @@ namespace AmongUsCapture
     }
     class GameMemReader
     {
-
         private static GameMemReader instance = new GameMemReader();
 
         private ProcessMemoryBase _processMemoryReader;
