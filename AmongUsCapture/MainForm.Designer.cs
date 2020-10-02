@@ -1,5 +1,6 @@
 ﻿namespace AmongUsCapture
 {
+    /*
     partial class MainForm
     {
         /// <summary>
@@ -69,5 +70,6 @@
         private System.Windows.Forms.Label label2;
         public System.Windows.Forms.Label playerCountLabel;
     }
+    */
 }
 

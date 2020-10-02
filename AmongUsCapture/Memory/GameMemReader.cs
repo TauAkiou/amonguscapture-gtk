@@ -7,9 +7,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using TextColorLibrary;
-
 namespace AmongUsCapture
 {
     public enum GameState
