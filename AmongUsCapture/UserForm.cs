@@ -377,7 +377,7 @@ namespace AmongUsCapture
             } 
            
         }
-    
+
     }
 
 }
