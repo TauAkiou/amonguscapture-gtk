@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
+using System.Text.RegularExpressions;
 using Gdk;
 using GLib;
 using Gtk;
@@ -17,10 +18,15 @@ namespace AmongUsCapture
 {
     public partial class UserForm : Window
     {
+        // Member method because GTK likes to crash for no fucking reason
+        private bool _autoscroll = false;
+        
         private ClientSocket clientSocket;
+        private bool _contextmenumodified = false;
         private static Atom _atom = Atom.Intern("CLIPBOARD", false);
         private Clipboard _clipboard = Clipboard.Get(_atom);
         public static Color NormalTextColor = Color.Black;
+        
         private Color Rainbow(float progress)
         {
             float div = (Math.Abs(progress % 1) * 6);
@@ -56,8 +62,39 @@ namespace AmongUsCapture
             GameMemReader.getInstance().ChatMessageAdded += OnChatMessageAdded;
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
             
+            // Get the user's default GTK TextView foreground color.
+            var userwidgetpath = new WidgetPath();
+            var userstylecontext = new StyleContext();
+
+            userwidgetpath.AppendType(Gtk.TextView.GType);
+            userstylecontext.Path = userwidgetpath;
+            NormalTextColor = GetRgbColorFromRgba(userstylecontext.GetColor(Gtk.StateFlags.Normal));
+
         }
 
+        private void _consoleTextView_OnPopulateContextMenu(object o, PopulatePopupArgs e)
+        {
+            Menu textViewContextMenu = (Menu)e.Args[0];
+            CheckMenuItem _autoscrollMenuItem = new CheckMenuItem();
+            _autoscrollMenuItem.Name = "_autoscrollMenuItem";
+            _autoscrollMenuItem.Label = "Auto Scroll";
+            _autoscrollMenuItem.TooltipText = "Enable or disable console autoscrolling.";
+            _autoscrollMenuItem.Active = _autoscroll;
+
+            _autoscrollMenuItem.Toggled += delegate(object sender, EventArgs args)
+            {
+                // it has to be written this way to get around a crash.
+                // don't know why, but i do what must be done, apparently.
+                var button = sender as CheckMenuItem;
+                _autoscroll = button.Active;
+
+            };
+            
+            textViewContextMenu.Append(_autoscrollMenuItem);
+            _autoscrollMenuItem.Show();
+
+        }
+        
         private void consoleTextView_OnRightClick(object o, ButtonPressEventArgs e)
         {
             if (e.Event.Button == 3)
@@ -192,14 +229,15 @@ namespace AmongUsCapture
             }
         }
 
-        private void ConsoleTextBox_TextChanged(object sender, EventArgs e)
-        { /*
-            if (AutoScrollMenuItem.Checked)
+        private void _consoleTextView_BufferChanged(object sender, EventArgs e)
+        { 
+            if (_autoscroll)
             {
-                ConsoleTextBox.SelectionStart = ConsoleTextBox.Text.Length;
-                ConsoleTextBox.ScrollToCaret();
+                var scrolladj = _consoleScrolledWindow.Vadjustment;
+                scrolladj.Value = scrolladj.Upper - scrolladj.PageSize;
+
             }
-            */
+            
         }
 
         private void TestFillConsole(int entries) //Helper test method to see if filling console works.
@@ -233,9 +271,9 @@ namespace AmongUsCapture
                 Idle.Add(delegate
                 {
                     var iter = _consoleTextView.Buffer.EndIter;
-                    _consoleTextView.Buffer.Insert(ref iter, addNewLine
-                        ? $"{line}{Environment.NewLine}"
-                        : line);
+                    _consoleTextView.Buffer.InsertMarkup(ref iter, addNewLine
+                        ? $"<span foreground=\"#{color.R.ToString("X2")}{color.G.ToString("X2")}{color.B.ToString("X2")}\">{line}</span>{Environment.NewLine}" 
+                        : $"<span foreground=\"#{color.R.ToString("X2")}{color.G.ToString("X2")}{color.B.ToString("X2")}\">{line}</span>");
                     _consoleTextView.Buffer.PlaceCursor(iter);
                 return false;
                 });
@@ -376,6 +414,17 @@ namespace AmongUsCapture
                 _clipboard.Text = _gameCodeEntryField.Text;
             } 
            
+        }
+
+        private Color GetRgbColorFromRgba(RGBA gtkcolor)
+        {
+            var A = (byte)(gtkcolor.Alpha * 255);
+            var R = (byte)(gtkcolor.Red * 255);
+            var G = (byte)(gtkcolor.Green * 255);
+            var B = (byte)(gtkcolor.Blue * 255);
+
+            return System.Drawing.Color.FromArgb(A, R, G, B);
+
         }
     
     }

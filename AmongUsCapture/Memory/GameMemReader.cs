@@ -49,7 +49,7 @@ namespace AmongUsCapture
 
         private int prevChatBubsVersion;
 
-        protected GameMemReader()
+        private GameMemReader()
         {
             
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
