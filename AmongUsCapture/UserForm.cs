@@ -52,8 +52,7 @@ namespace AmongUsCapture
         public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
         {
             //builder.Autoconnect(this);
-            var pixbuf = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
-            Icon = pixbuf;
+            Icon = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
             clientSocket = sock;
             InitializeWindow();
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
@@ -62,11 +61,14 @@ namespace AmongUsCapture
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
 
             // Load URL
-            URLTextBox.Text = Settings.PersistentSettings.host;
+            _urlHostEntryField.Text = Settings.PersistentSettings.host;
 
             // Connect on Enter
-            this.AcceptButton = ConnectButton;
+            //this.AcceptButton = ConnectButton;
+            this.Default = _connectCodeSubmitButton;
             
+            
+
             // Get the user's default GTK TextView foreground color.
             var userwidgetpath = new WidgetPath();
             var userstylecontext = new StyleContext();
@@ -80,7 +82,10 @@ namespace AmongUsCapture
         private void _consoleTextView_OnPopulateContextMenu(object o, PopulatePopupArgs e)
         {
             Menu textViewContextMenu = (Menu)e.Args[0];
+            SeparatorMenuItem _contextMenuSeperator = new SeparatorMenuItem();
             CheckMenuItem _autoscrollMenuItem = new CheckMenuItem();
+            
+            
             _autoscrollMenuItem.Name = "_autoscrollMenuItem";
             _autoscrollMenuItem.Label = "Auto Scroll";
             _autoscrollMenuItem.TooltipText = "Enable or disable console autoscrolling";
@@ -89,13 +94,14 @@ namespace AmongUsCapture
             _autoscrollMenuItem.Toggled += delegate(object sender, EventArgs args)
             {
                 // it has to be written this way to get around a crash.
-                // don't know why, but i do what must be done, apparently.
+                // don't know why, but i do what must be done.
                 var button = sender as CheckMenuItem;
                 _autoscroll = button.Active;
             };
-            
+
+            textViewContextMenu.Append(_contextMenuSeperator);
             textViewContextMenu.Append(_autoscrollMenuItem);
-            _autoscrollMenuItem.Show();
+            textViewContextMenu.ShowAll();
 
         }
         
@@ -131,6 +137,7 @@ namespace AmongUsCapture
             //WriteLineToConsole($"[CHAT] {e.Sender}: {e.Message}");
         }
 
+        /*
         private void ConnectCodeBox_Enter(object sender, EventArgs e)
         {
             this.BeginInvoke((MethodInvoker)delegate ()
@@ -149,6 +156,7 @@ namespace AmongUsCapture
             }
 
         }
+        */
 
         private void UserForm_PlayerChanged(object sender, PlayerChangedEventArgs e)
         {
@@ -177,14 +185,14 @@ namespace AmongUsCapture
         private void _connectCodeSubmitButton_Click(object sender, EventArgs e)
         {
 
-            ConnectCodeBox.Enabled = false;
-            ConnectButton.Enabled = false;
-            URLTextBox.Enabled = false;
+            _connectCodeEntryField.Sensitive = false;
+            _connectCodeSubmitButton.Sensitive = false;
+            _urlHostEntryField.Sensitive = false;
 
             var url = "http://localhost:8123";
-            if (URLTextBox.Text != "")
+            if (_urlHostEntryField.Text != "")
             {
-                url = URLTextBox.Text;
+                url = _urlHostEntryField.Text;
             }
 
             doConnect(url);
@@ -196,7 +204,7 @@ namespace AmongUsCapture
             {
                 Settings.PersistentSettings.host = url;
 
-                clientSocket.SendConnectCode(ConnectCodeBox.Text, (sender, e) =>
+                clientSocket.SendConnectCode(_connectCodeEntryField.Text, (sender, e) =>
                 {
                     if (lastJoinedLobby != null) // Send the game code _after_ the connect code
                     {
@@ -211,18 +219,20 @@ namespace AmongUsCapture
             }
             catch (Exception e)
             {
-                MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
-                ConnectCodeBox.Enabled = true;
-                ConnectButton.Enabled = true;
-                URLTextBox.Enabled = true;
+                //MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+                _connectCodeEntryField.Sensitive = true;
+                _connectCodeSubmitButton.Sensitive = true;
+                _urlHostEntryField.Sensitive = true;
                 return;
             }
         }
 
+        /*
         private void ConnectCodeBox_TextChanged(object sender, EventArgs e)
         {
             ConnectButton.Enabled = (ConnectCodeBox.Enabled && ConnectCodeBox.Text.Length == 6 && !ConnectCodeBox.Text.Contains(" "));
         }
+        */
 
         private void _consoleTextView_BufferChanged(object sender, EventArgs e)
         { 

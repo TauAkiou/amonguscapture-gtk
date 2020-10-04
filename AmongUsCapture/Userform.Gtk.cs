@@ -19,6 +19,15 @@ namespace AmongUsCapture
         private Box _gameCodeLayoutContainer;
         private Entry _gameCodeEntryField;
         private Button _gameCodeCopyButton;
+
+        // Websocket/Host Control
+        private Frame _hostControlFrame;
+        private VBox _hostControlLayoutContainer;
+
+
+        private Frame _urlHostEntryFrame;
+        private HBox _urlHostEntryLayoutContainer;
+        private Entry _urlHostEntryField;
         
         // Connect Code
         private Frame _connectCodeParentFrame;
@@ -26,22 +35,18 @@ namespace AmongUsCapture
         private Button _connectCodeSubmitButton;
         private Entry _connectCodeEntryField;
         
+        
         // Right Side Text Console
 
         private Frame _consoleParentFrame;
         private VBox _consoleLayoutContainer;
         private ScrolledWindow _consoleScrolledWindow;
         private TextView _consoleTextView;
-        private Menu _consoleContextMenu;
 
 
         private Box _currentStateContainer;
         private Frame _currentStateFrame;
         private Label _currentStateLabel;
-
-
-        private CheckMenuItem _autoScrollCheckMenuItem;
-        private MenuItem _autoScrollMenuItem;
 
 
 
@@ -68,31 +73,33 @@ namespace AmongUsCapture
             _gameCodeCopyButton = new Button();
             _gameCodeEntryField = new Entry();
 
-            // Left Side Connect Code Fields
+            // Left Side Websocket/Host Control
+            _hostControlFrame = new Frame();
+            _hostControlLayoutContainer = new VBox();
+
+            _urlHostEntryFrame = new Frame();
+            _urlHostEntryLayoutContainer = new HBox();
+            _urlHostEntryField = new Entry();
 
             _connectCodeParentFrame = new Frame();
             _connectCodeLayoutContainer = new HBox();
             _connectCodeSubmitButton = new Button();
             _connectCodeEntryField = new Entry();
+            
+
+            
 
             // Right Side Console
             _consoleScrolledWindow = new ScrolledWindow();
             _consoleLayoutContainer = new VBox();
             _consoleParentFrame = new Frame();
+            
             _consoleTextView = new TextView();
             
-            
-            _autoScrollCheckMenuItem = new CheckMenuItem();
-            _consoleContextMenu = new Menu();
-            _autoScrollMenuItem = new MenuItem();
-  
-
-
             // _primaryWindowPane definition (splitContainer1)
             _primaryWindowPane.Name = "_primaryWindowPane";
             _primaryWindowPane.SetSizeRequest(824, 476);
             _primaryWindowPane.Position = 180;
-            _primaryWindowPane.TooltipText = "paneContainer1";
 
             _primaryWindowPane.Pack1(_primaryWindowLeftContainer, true, false);
             _primaryWindowPane.Pack2(_consoleParentFrame, true, false);
@@ -111,8 +118,8 @@ namespace AmongUsCapture
 
             _userSettingsParentContainer.Margin = 5;
             _userSettingsParentContainer.PackStart(_currentStateFrame, true, false, 10);
+            _userSettingsParentContainer.PackStart(_hostControlFrame, true, false, 10);
             _userSettingsParentContainer.PackStart(_gameCodeParentFrame, true, false, 5);
-            _userSettingsParentContainer.PackStart(_connectCodeParentFrame, true, false, 5);
             _userSettingsParentContainer.Name = "_userSettingsParentContainer";
             
             // CurrentStateFrame
@@ -159,6 +166,27 @@ namespace AmongUsCapture
            
             // CONNECT CODE UI BLOCK
 
+            // HOST CONTROL UI BLOCK
+
+            _hostControlFrame.Name = "_hostControlFrame";
+            _hostControlFrame.Label = "Server Connection";
+            _hostControlFrame.Add(_hostControlLayoutContainer);
+
+            _hostControlLayoutContainer.Name = "_hostControlLayoutContainer";
+            _hostControlLayoutContainer.Margin = 5;
+            _hostControlLayoutContainer.SetSizeRequest(25, 20);
+            _hostControlLayoutContainer.PackStart(_urlHostEntryFrame, true, false, 5);
+            _hostControlLayoutContainer.PackStart(_connectCodeParentFrame, true, false, 5);
+
+            _urlHostEntryFrame.Name = "_urlHostEntryFrame";
+            _urlHostEntryFrame.Label = "Server URL";
+            _urlHostEntryFrame.Add(_urlHostEntryLayoutContainer);
+
+            _urlHostEntryLayoutContainer.Name = "_urlHostEntryLayoutContainer";
+            _urlHostEntryLayoutContainer.SetSizeRequest(25, 20);
+            _urlHostEntryLayoutContainer.PackStart(_urlHostEntryField, true, false, 5);
+            _urlHostEntryLayoutContainer.MarginBottom = 5;
+                
             _connectCodeParentFrame.Name = "_connectCodeParentFrame";
             _connectCodeParentFrame.Label = "Connect Code";
             _connectCodeParentFrame.Add(_connectCodeLayoutContainer);
@@ -167,7 +195,7 @@ namespace AmongUsCapture
             _connectCodeLayoutContainer.SetSizeRequest(25, 20);
             _connectCodeLayoutContainer.PackStart(_connectCodeEntryField, true, false, 5);
             _connectCodeLayoutContainer.PackStart(_connectCodeSubmitButton, true, false, 5);
-            _connectCodeLayoutContainer.MarginBottom = 7;
+            _connectCodeLayoutContainer.MarginBottom = 5;
             
             _connectCodeEntryField.Name = "_connectCodeEntryField";
             _connectCodeEntryField.Xalign = (float)0.5;
@@ -178,6 +206,9 @@ namespace AmongUsCapture
             _connectCodeSubmitButton.Label = "Submit";
             _connectCodeSubmitButton.SetSizeRequest(30, 20);
             _connectCodeSubmitButton.Clicked += _connectCodeSubmitButton_Click;
+            _connectCodeSubmitButton.CanDefault = true;
+            
+            
             
             // Right Side
             _consoleParentFrame.Name = "_consoleParentFrame";
