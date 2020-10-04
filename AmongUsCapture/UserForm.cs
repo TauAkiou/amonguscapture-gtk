@@ -83,7 +83,7 @@ namespace AmongUsCapture
             CheckMenuItem _autoscrollMenuItem = new CheckMenuItem();
             _autoscrollMenuItem.Name = "_autoscrollMenuItem";
             _autoscrollMenuItem.Label = "Auto Scroll";
-            _autoscrollMenuItem.TooltipText = "Enable or disable console autoscrolling.";
+            _autoscrollMenuItem.TooltipText = "Enable or disable console autoscrolling";
             _autoscrollMenuItem.Active = _autoscroll;
 
             _autoscrollMenuItem.Toggled += delegate(object sender, EventArgs args)
@@ -92,7 +92,6 @@ namespace AmongUsCapture
                 // don't know why, but i do what must be done, apparently.
                 var button = sender as CheckMenuItem;
                 _autoscroll = button.Active;
-
             };
             
             textViewContextMenu.Append(_autoscrollMenuItem);
@@ -231,7 +230,6 @@ namespace AmongUsCapture
             {
                 var scrolladj = _consoleScrolledWindow.Vadjustment;
                 scrolladj.Value = scrolladj.Upper - scrolladj.PageSize;
-
             }
             
         }
@@ -414,12 +412,13 @@ namespace AmongUsCapture
 
         private Color GetRgbColorFromRgba(RGBA gtkcolor)
         {
+            // it's quick and sloppy, but these are GUI colors and don't have to be horribly accurate.
             var A = (byte)(gtkcolor.Alpha * 255);
             var R = (byte)(gtkcolor.Red * 255);
             var G = (byte)(gtkcolor.Green * 255);
             var B = (byte)(gtkcolor.Blue * 255);
 
-            return System.Drawing.Color.FromArgb(A, R, G, B);
+            return Color.FromArgb(A, R, G, B);
 
         }
     
