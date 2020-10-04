@@ -9,7 +9,7 @@ using System.Text;
 
 namespace AmongUsCapture
 {
-    public class ProcessMemoryLinux : ProcessMemoryBase
+    public class ProcessMemoryLinux : ProcessMemory
     {
         public override bool HookProcess(string name)
         {

@@ -19,7 +19,7 @@ namespace AmongUsCapture
                 }
                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                 {
-                    throw new NotImplementedException();
+                    instance = new ProcessMemoryLinux();
                 }
                 else
                 {
