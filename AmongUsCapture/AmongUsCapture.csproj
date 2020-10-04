@@ -28,9 +28,7 @@
     <Compile Update="Userform.Gtk.cs">
       <DependentUpon>UserForm.cs</DependentUpon>
     </Compile>
-=======
     <Folder Include="TextColorLibrary\" />
->>>>>>> upstream/master
   </ItemGroup>
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>

@@ -40,7 +40,7 @@ namespace AmongUsCapture
         private Label _currentStateLabel;
 
 
-        private CheckButton _autoScrollCheckbox;
+        private CheckMenuItem _autoScrollCheckMenuItem;
         private MenuItem _autoScrollMenuItem;
 
 
@@ -82,7 +82,7 @@ namespace AmongUsCapture
             _consoleTextView = new TextView();
             
             
-            _autoScrollCheckbox = new CheckButton();
+            _autoScrollCheckMenuItem = new CheckMenuItem();
             _consoleContextMenu = new Menu();
             _autoScrollMenuItem = new MenuItem();
   
@@ -194,7 +194,10 @@ namespace AmongUsCapture
 
             _consoleTextView.Name = "_consoleTextView";
             _consoleTextView.Editable = false;
-            _consoleTextView.ButtonPressEvent += (o, args) => { this.consoleTextView_OnRightClick(o, args); };
+
+            //_autoScrollCheckMenuItem.Name = "_autoscrollMenuItem";
+            _consoleTextView.PopulatePopup += _consoleTextView_OnPopulateContextMenu;
+            _consoleTextView.Buffer.Changed += _consoleTextView_BufferChanged;
 
             SetDefaultSize(824, 476);
            Add(_primaryWindowPane);
