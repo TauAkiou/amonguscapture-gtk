@@ -93,6 +93,8 @@ namespace AmongUsCapture
             about.Name = "_amonguscaptureGtkAboutDialog";
             about.ProgramName = "Among Us Capture (GTK)";
             string version = String.Empty;
+            string master = String.Empty;
+            
             using(Stream stream = Assembly.GetExecutingAssembly()
                 .GetManifestResourceStream("amonguscapture_gtk.version.txt"))
                 if (stream == null)
@@ -104,13 +106,28 @@ namespace AmongUsCapture
                         version = sreader.ReadToEnd();
                     }
                 }
+            
+            using(Stream stream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("amonguscapture_gtk.master.txt"))
+            {    
+                // Contains the original tag/hash from the source build.
+                using (StreamReader sreader = new StreamReader(stream))
+                {
+                    master = sreader.ReadToEnd();
+                }
+            }
 
+            about.Icon = abouticon;
             about.Version = version;
-            about.Comments = "amonguscapture_gtk is a GTK version of the Among Us Capture utility made by denverquane.";
+            about.Authors = new[] {"TauAkiou (GTK Port)", "denverquane (Original Version)", "Other Contributors"};
+            about.Comments = "amonguscapture_gtk is a GTK version of the Among Us Capture utility." +
+                             $"\n\nBased on amonguscapture {master}";
             about.Website = "https://github.com/TauAkiou/amonguscapture-gtk";
             about.Logo = abouticon;
 
+            about.Present();
             about.Run();
+            
 
             about.Dispose();
 

@@ -75,6 +75,7 @@ namespace AmongUsCapture
             
             _primaryWindowMenuFile = new Menu();
             _primaryWindowMenuQuitItem = new MenuItem();
+            _primaryMenuItemAbout = new MenuItem();
             
             
             // Top level window pane.
@@ -130,6 +131,7 @@ namespace AmongUsCapture
             
             _primaryWindowMenuBar.Name = "_primaryWindowMenuBar";
             _primaryWindowMenuBar.Append(_primaryMenuItemFile);
+            _primaryWindowMenuBar.Append(_primaryMenuItemAbout);
 
             _primaryMenuItemFile.Name = "_primaryMenuItemFile";
             _primaryMenuItemFile.Label = "File";

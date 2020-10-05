@@ -20,6 +20,7 @@
   <ItemGroup>
     <EmbeddedResource Include="icon.ico" />
     <EmbeddedResource Include="version.txt" />
+    <EmbeddedResource Include="master.txt" />
   </ItemGroup>
 
   <ItemGroup>
