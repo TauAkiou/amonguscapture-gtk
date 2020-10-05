@@ -9,37 +9,37 @@ AmongusCapture-gtk is currently supported under:
 * Windows
 * Linux
 
-##Requirements:
+## Requirements:
 
-###Windows:
+### Windows:
 
 While you can use amonguscapture-gtk under Windows, we recommend using the [official release](https://github.com/denverquane/amonguscapture).
 
 * .NET Core 3.1 Runtime: https://dotnet.microsoft.com/download/dotnet-core/current/runtime
 * GTK For Windows Runtime: https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
 
-###Linux:
+### Linux:
 
 * .NET Core 3.1: https://docs.microsoft.com/en-us/dotnet/core/install/linux
 * GTK3: Check your distribution's packaging manager for information on how to install. If you already have Gnome installed, you likely already have gtk3.
 
-##Building
+## Building
 
 
 
-###Windows
+### Windows
 
 
 * .NET Core SDK: https://dotnet.microsoft.com/download
 * Visual Studio
     - Loading the 'AmongUsCapture.sln' file and building should be sufficient enough - all packages should be downloaded from NuGet.
     
-###Linux
+### Linux
 * .NET Core 3.1 SDK: https://docs.microsoft.com/en-us/dotnet/core/install/linux
 * GTK3 development libraries: Check your distribution's packaging manager for information on how to install.
 
-####Instructions: 
+#### Instructions: 
     - git clone https://github.com/TauAkiou/amonguscapture-gtk/tree/linux-mem-new
     
-    If you are using a non-master repository, switch to the correct 
+    Instructions still in progress...
 
