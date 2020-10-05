@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
@@ -76,6 +77,43 @@ namespace AmongUsCapture
             userwidgetpath.AppendType(Gtk.TextView.GType);
             userstylecontext.Path = userwidgetpath;
             NormalTextColor = GetRgbColorFromRgba(userstylecontext.GetColor(Gtk.StateFlags.Normal));
+
+        }
+
+        private void _primaryWindowMenuQuitItem_Activated(object o, EventArgs e)
+        {
+            this.Close();
+        }
+
+        private void _primaryWindowMenuItemAbout_Activated(object o, EventArgs e)
+        {
+            var abouticon = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
+            AboutDialog about = new AboutDialog();
+
+            about.Name = "_amonguscaptureGtkAboutDialog";
+            about.ProgramName = "Among Us Capture (GTK)";
+            string version = String.Empty;
+            using(Stream stream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("amonguscapture_gtk.version.txt"))
+                if (stream == null)
+                    version = "Unknown";
+                else
+                {
+                    using (StreamReader sreader = new StreamReader(stream))
+                    {
+                        version = sreader.ReadToEnd();
+                    }
+                }
+
+            about.Version = version;
+            about.Comments = "amonguscapture_gtk is a GTK version of the Among Us Capture utility made by denverquane.";
+            about.Website = "https://github.com/TauAkiou/amonguscapture-gtk";
+            about.Logo = abouticon;
+
+            about.Run();
+
+            about.Dispose();
+
 
         }
 

@@ -6,6 +6,17 @@ namespace AmongUsCapture
 {
     public partial class UserForm
     {
+        // Menubar
+        private VBox _primaryWindowContainer;
+        private MenuBar _primaryWindowMenuBar;
+        private MenuItem _primaryMenuItemFile;
+        private MenuItem _primaryMenuItemAbout;
+        
+        // Menu
+        private Menu _primaryWindowMenuFile;
+        private MenuItem _primaryWindowMenuQuitItem;
+        
+        
         // Top level windows
         private HPaned _primaryWindowPane;
         private VBox _primaryWindowLeftContainer;
@@ -13,6 +24,9 @@ namespace AmongUsCapture
         // UserSettings (Left Side)
         private VBox _userSettingsParentContainer;
         private Frame _userSettingsParentFrame;
+
+        private Frame _gameInfoParentFrame;
+        private VBox _gameInfoParentContainer;
         
         // GameCode objects
         private Frame _gameCodeParentFrame;
@@ -23,8 +37,7 @@ namespace AmongUsCapture
         // Websocket/Host Control
         private Frame _hostControlFrame;
         private VBox _hostControlLayoutContainer;
-
-
+        
         private Frame _urlHostEntryFrame;
         private HBox _urlHostEntryLayoutContainer;
         private Entry _urlHostEntryField;
@@ -54,6 +67,16 @@ namespace AmongUsCapture
 
         public void InitializeWindow()
         {
+            // Menubar
+            _primaryWindowContainer = new VBox();
+            _primaryWindowMenuBar = new MenuBar();
+            
+            _primaryMenuItemFile = new MenuItem();
+            
+            _primaryWindowMenuFile = new Menu();
+            _primaryWindowMenuQuitItem = new MenuItem();
+            
+            
             // Top level window pane.
             _primaryWindowPane = new HPaned();
             _primaryWindowLeftContainer = new VBox();
@@ -61,6 +84,9 @@ namespace AmongUsCapture
             // Left side User Settings Pane
             _userSettingsParentFrame = new Frame();
             _userSettingsParentContainer = new VBox();
+
+            _gameInfoParentFrame = new Frame();
+            _gameInfoParentContainer = new VBox();
             
             // Left Side Current State Field
             _currentStateFrame = new Frame();
@@ -96,6 +122,30 @@ namespace AmongUsCapture
             
             _consoleTextView = new TextView();
             
+            //
+
+            _primaryWindowContainer.Name = "_primaryWindowContainer";
+            _primaryWindowContainer.PackStart(_primaryWindowMenuBar, false, false, 2);
+            _primaryWindowContainer.PackStart(_primaryWindowPane, true, true, 0);
+            
+            _primaryWindowMenuBar.Name = "_primaryWindowMenuBar";
+            _primaryWindowMenuBar.Append(_primaryMenuItemFile);
+
+            _primaryMenuItemFile.Name = "_primaryMenuItemFile";
+            _primaryMenuItemFile.Label = "File";
+            _primaryMenuItemFile.Submenu = _primaryWindowMenuFile;
+
+            _primaryMenuItemAbout.Name = "_primaryMenuItemAbout";
+            _primaryMenuItemAbout.Label = "About";
+            _primaryMenuItemAbout.Activated += _primaryWindowMenuItemAbout_Activated;
+
+            _primaryWindowMenuFile.Name = "_primaryWindowMenu";
+            _primaryWindowMenuFile.Append(_primaryWindowMenuQuitItem);
+
+            _primaryWindowMenuQuitItem.Name = "_primaryWindowMenuQuitItem";
+            _primaryWindowMenuQuitItem.Label = "Quit";
+            _primaryWindowMenuQuitItem.Activated += _primaryWindowMenuQuitItem_Activated;
+
             // _primaryWindowPane definition (splitContainer1)
             _primaryWindowPane.Name = "_primaryWindowPane";
             _primaryWindowPane.SetSizeRequest(824, 476);
@@ -117,10 +167,19 @@ namespace AmongUsCapture
             _userSettingsParentFrame.Add(_userSettingsParentContainer);
 
             _userSettingsParentContainer.Margin = 5;
-            _userSettingsParentContainer.PackStart(_currentStateFrame, true, false, 10);
+            _userSettingsParentContainer.PackStart(_gameInfoParentFrame, true, false, 10);
             _userSettingsParentContainer.PackStart(_hostControlFrame, true, false, 10);
-            _userSettingsParentContainer.PackStart(_gameCodeParentFrame, true, false, 5);
             _userSettingsParentContainer.Name = "_userSettingsParentContainer";
+
+            _gameInfoParentFrame.Name = "_gameInfoParentFrame";
+            _gameInfoParentFrame.Label = "Game Information";
+            _gameInfoParentFrame.SetSizeRequest(55, 40);
+            _gameInfoParentFrame.Add(_gameInfoParentContainer);
+
+            _gameInfoParentContainer.Name = "_gameInfoParentContainer";
+            _gameInfoParentContainer.PackStart(_currentStateFrame, true, false, 10);
+            _gameInfoParentContainer.PackStart(_gameCodeParentFrame, true, false, 10);
+            _gameInfoParentContainer.Margin = 5;
             
             // CurrentStateFrame
             _currentStateFrame.Add(_currentStateContainer);
@@ -183,7 +242,7 @@ namespace AmongUsCapture
             _urlHostEntryFrame.Add(_urlHostEntryLayoutContainer);
 
             _urlHostEntryLayoutContainer.Name = "_urlHostEntryLayoutContainer";
-            _urlHostEntryLayoutContainer.SetSizeRequest(25, 20);
+            _urlHostEntryLayoutContainer.SetSizeRequest(70, 20);
             _urlHostEntryLayoutContainer.PackStart(_urlHostEntryField, true, false, 5);
             _urlHostEntryLayoutContainer.MarginBottom = 5;
                 
@@ -199,7 +258,7 @@ namespace AmongUsCapture
             
             _connectCodeEntryField.Name = "_connectCodeEntryField";
             _connectCodeEntryField.Xalign = (float)0.5;
-            _connectCodeEntryField.SetSizeRequest(50, 20);
+            _connectCodeEntryField.SetSizeRequest(70, 20);
             _connectCodeEntryField.MaxLength = 6;
 
             _connectCodeSubmitButton.Name = "_connectCodeSubmitButton";
@@ -231,7 +290,7 @@ namespace AmongUsCapture
             _consoleTextView.Buffer.Changed += _consoleTextView_BufferChanged;
 
             SetDefaultSize(824, 476);
-           Add(_primaryWindowPane);
+            Add(_primaryWindowContainer);
            
         }
         

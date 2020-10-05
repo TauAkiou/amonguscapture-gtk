@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <EmbeddedResource Include="icon.ico" />
+    <EmbeddedResource Include="version.txt" />
   </ItemGroup>
 
   <ItemGroup>
