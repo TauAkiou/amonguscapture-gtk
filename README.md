@@ -7,4 +7,4 @@ A GTK port of the amonguscapture utility, primarily for use on non-windows opera
 
 Master is currently awaiting the 'multiplatform' branch from the base project (https://github.com/denverquane/amonguscapture) to be merged.
 
-Use the 'linux-mem-new' branch for the current release.
+Use the '[linux-mem-new](https://github.com/TauAkiou/amonguscapture-gtk/tree/linux-mem-new)' branch for the current release.
