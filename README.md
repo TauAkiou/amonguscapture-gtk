@@ -31,8 +31,20 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
 
 
 * .NET Core SDK: https://dotnet.microsoft.com/download
-* Visual Studio
-    - Loading the 'AmongUsCapture.sln' file and building should be sufficient enough - all packages should be downloaded from NuGet.
+* Visual Studio (Recommended)
+```
+    - Create a new file: 'version.txt' in the AmongUsCapture/ directory.
+    - Loading the 'AmongUsCapture.sln' file and building should be sufficient enough.
+```
+    
+ * Command Line
+```
+  - Navigate to the directory you cloned the git repository to, or where you extraced the source package to.
+  
+  - Create a new file 'version.txt' in the AmongUsCapture/ directory.
+  - 'dotnet build --configuration Release' for release builds
+  - 'dotnet build --configuration Debug' for debug builds
+```
     
 ### Linux
 * .NET Core 3.1 SDK: https://docs.microsoft.com/en-us/dotnet/core/install/linux
@@ -41,5 +53,11 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
 #### Instructions: 
     - git clone https://github.com/TauAkiou/amonguscapture-gtk/tree/linux-mem-new
     
-    Instructions still in progress...
+    For release builds:
+    - cd amonguscapture-gtk 
+    - 'make' or 'make release'
+    
+    For debug builds:
+    - cd amonguscapture-gtk
+    - 'make debug'
 
