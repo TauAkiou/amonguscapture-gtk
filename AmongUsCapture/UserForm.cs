@@ -67,16 +67,9 @@ namespace AmongUsCapture
             // Connect on Enter
             //this.AcceptButton = ConnectButton;
             this.Default = _connectCodeSubmitButton;
-            
-            
 
             // Get the user's default GTK TextView foreground color.
-            var userwidgetpath = new WidgetPath();
-            var userstylecontext = new StyleContext();
-
-            userwidgetpath.AppendType(Gtk.TextView.GType);
-            userstylecontext.Path = userwidgetpath;
-            NormalTextColor = GetRgbColorFromRgba(userstylecontext.GetColor(Gtk.StateFlags.Normal));
+            NormalTextColor = GetRgbColorFromRgba(_consoleTextView.StyleContext.GetColor(Gtk.StateFlags.Normal));
 
         }
 
