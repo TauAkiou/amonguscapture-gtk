@@ -64,6 +64,8 @@ I'm currently having some trouble with the makefile, so here are some manual ins
 
 - dotnet build -c <release/debug>
 
+Your code will be in amonguscapture-gtk/bin/<Release/Debug>/netcoreapp3.1>
+
 ```
 
 Makefile instructions for when I get it working again:
