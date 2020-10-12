@@ -51,6 +51,23 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
 * GTK3 development libraries: Check your distribution's packaging manager for information on how to install.
 
 #### Instructions: 
+
+I'm currently having some trouble with the makefile, so here are some manual instructions:
+```
+- git clone https://github.com/TauAkiou/amonguscapture-gtk
+
+- git checkout linux-mem-new
+
+- cd amonguscapture-gtk
+
+- git rev-parse HEAD > AmongUsCapture/version.txt
+
+- dotnet build -c <release/debug>
+
+```
+
+Makefile instructions for when I get it working again:
+
     - git clone https://github.com/TauAkiou/amonguscapture-gtk/tree/linux-mem-new
     
     For release builds:
