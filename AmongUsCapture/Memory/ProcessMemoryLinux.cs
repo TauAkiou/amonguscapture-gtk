@@ -64,21 +64,20 @@ namespace AmongUsCapture
         public override void LoadModules()
         {
             modules = new List<Module>();
-
-            // Seems like ReadOnlyCollections are too much of a horrible hassle to work with.
-            // Therefore, we are going to collect our module data from /proc/<pid>/maps.
+            
+            // Read /proc/<pid>/maps for library mapping information.
+            // Reading from /proc/<pid>/maps is negligible, since this file is a kernel pseudofile.
             if (!File.Exists($"/proc/{process.Id}/maps"))
             {
                 // We don't have the maps file yet, or we ended up in a state where it doesn't exist.
                 return;
             }
-
-
+            
             var proc_maps = File.ReadLines($"/proc/{process.Id}/maps")
                 .Where(s => s.Contains("GameAssembly.dll"))
                 .ToList();
 
-            if (proc_maps == null || proc_maps.Count <= 0)
+            if (proc_maps.Count <= 0)
             {
                 // If we don't have a line, the maps file hasn't been populated yet,
                 // or GameAssembly.dll hasn't been loaded.
@@ -89,41 +88,39 @@ namespace AmongUsCapture
 
             // We want the first one, since that represents the beginning
             // of the GameAssembly.dll memory space.
-
-            var loaded_module = new Module();
-
+            
             // /proc/pid/maps legend:
             // address           perms offset  dev   inode   pathname
 
             string[] map_lines1 = proc_maps[0].Split(" ", StringSplitOptions.RemoveEmptyEntries);
             string[] addr_vals1 = map_lines1[0].Split('-');
-
-
-            int StartAddr = Int32.Parse(addr_vals1[0], System.Globalization.NumberStyles.HexNumber);
-            int EndAddr = Int32.Parse(addr_vals1[1], System.Globalization.NumberStyles.HexNumber);
-            int MemorySize = EndAddr - StartAddr;
-            StringBuilder pathbuilder = new StringBuilder();
+            
+            // Under linux, we can confirm the actual 'start' location, but not the end. The 'end' is the
+            // end of the initial instance of 'GameAssembly.dll", which is likely not the entire entry.
+            // Therefore, our module will only really 'know' where the first entry ends.
+            
+            // We will have to change this if it becomes necessary, but for now, everything is working as intended.
+            
+            uint addr_start = UInt32.Parse(addr_vals1[0], System.Globalization.NumberStyles.HexNumber);
+            uint addr_end = UInt32.Parse(addr_vals1[1], System.Globalization.NumberStyles.HexNumber);
+            uint memsize =  addr_end - addr_start;
+            
 
             // Ensure we have an absolute path by catting all potential additional strings after index 5.
+            StringBuilder pathbuilder = new StringBuilder();
             for (int x = 5; x < map_lines1.Length; x++)
             {
                 pathbuilder.Append(map_lines1[x] + " ");
             }
 
             string librarypath = pathbuilder.ToString();
-
-            loaded_module.Name = librarypath.Split('/').Last();
-            loaded_module.BaseAddress = (IntPtr) StartAddr;
-            loaded_module.FileName = librarypath;
-            // I have no idea what this is. ProcessModule indicates it is 0x00 so I wll leave it as such for now.
-            // This is also not used by the code, and may not even apply under Linux anyway.
-            loaded_module.EntryPointAddress = IntPtr.Zero;
-
+            
             modules.Add(new Module()
             {
                 Name = librarypath.Split('/').Last().Trim(), // Make sure hidden characters aren't there.
-                BaseAddress = (IntPtr) StartAddr,
+                BaseAddress = (IntPtr) addr_start,
                 FileName = librarypath,
+                MemorySize = memsize,
                 EntryPointAddress = IntPtr.Zero
             });
 
@@ -178,16 +175,25 @@ namespace AmongUsCapture
             return ints;
         }
 
+        /*
+         * Compared to the Windows version of the ProcessMemory module, Linux requires some extra marshalling.
+         *
+         * This is because to read and store, Linux uses 'iovec' C structs to provide the base pointer
+         * and length of the information being read.
+         *
+         * Fortunately, these pointers can be reused, though they have to live in the unmanaged memory space. 
+         */
+        
         private int OffsetAddress(ref IntPtr address, params int[] offsets)
         {
             byte[] buffer = new byte[is64Bit ? 8 : 4];
             IntPtr buffer_marshal;
             IntPtr local_ptr;
             IntPtr remote_ptr;
-
-            // Reuse our buffers until we are finished.
+            
             unsafe
             {
+                // We need to work unsafe here to get the size of the iovec structures, then malloc them.
                 buffer_marshal = Marshal.AllocHGlobal(is64Bit ? 8 : 4);
                 local_ptr = Marshal.AllocHGlobal(sizeof(iovec));
                 remote_ptr = Marshal.AllocHGlobal(sizeof(iovec));
@@ -214,15 +220,13 @@ namespace AmongUsCapture
                 LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
 
                 Marshal.Copy(local.iov_base, buffer, 0, buffer.Length);
-
-
+                
                 if (is64Bit)
                     address = (IntPtr) BitConverter.ToUInt64(buffer, 0);
                 else
                     address = (IntPtr) BitConverter.ToUInt32(buffer, 0);
                 if (address == IntPtr.Zero)
                     break;
-
             }
 
             Marshal.FreeHGlobal(local_ptr);
@@ -250,8 +254,7 @@ namespace AmongUsCapture
                 local_ptr = Marshal.AllocHGlobal(sizeof(iovec));
                 remote_ptr = Marshal.AllocHGlobal(sizeof(iovec));
             }
-
-            // process_vm_readv uses the iovec structure, which needs additional marshalling.
+            
             var local = new iovec()
             {
                 iov_base = buffer_marshal,
@@ -262,11 +265,11 @@ namespace AmongUsCapture
                 iov_base = address,
                 iov_len = numBytes
             };
-
+            
             Marshal.StructureToPtr(local, local_ptr, true);
             Marshal.StructureToPtr(remote, remote_ptr, true);
 
-            var read = LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
+            LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
 
             Marshal.Copy(local.iov_base, buffer, 0, numBytes);
 
@@ -288,7 +291,11 @@ namespace AmongUsCapture
 
     public static class LinuxAPI
     {
-
+        // This should, in theory, import the correct libc lib regardless of distro.
+        // If we can't load it in the future, we may need to find a new library entry point.
+        //
+        // https://man7.org/linux/man-pages/man2/process_vm_readv.2.html
+        
         [DllImport("libc.so.6", SetLastError = true)]
         public static extern int process_vm_readv(int pid, IntPtr local_iov, ulong liovcnt, IntPtr remote_iov,
             ulong riovcnt, ulong flags);

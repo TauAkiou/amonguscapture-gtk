@@ -15,8 +15,7 @@ namespace AmongUsCapture
         // Menu
         private Menu _primaryWindowMenuFile;
         private MenuItem _primaryWindowMenuQuitItem;
-        
-        
+
         // Top level windows
         private HPaned _primaryWindowPane;
         private VBox _primaryWindowLeftContainer;
@@ -48,9 +47,10 @@ namespace AmongUsCapture
         private Button _connectCodeSubmitButton;
         private Entry _connectCodeEntryField;
         
-        
+        //
         // Right Side Text Console
-
+        //
+        
         private Frame _consoleParentFrame;
         private VBox _consoleLayoutContainer;
         private ScrolledWindow _consoleScrolledWindow;
@@ -113,9 +113,6 @@ namespace AmongUsCapture
             _connectCodeSubmitButton = new Button();
             _connectCodeEntryField = new Entry();
             
-
-            
-
             // Right Side Console
             _consoleScrolledWindow = new ScrolledWindow();
             _consoleLayoutContainer = new VBox();
@@ -198,7 +195,7 @@ namespace AmongUsCapture
 
             // CurrentState
             _currentStateLabel.Name = "_currentStateLabel";
-            _currentStateLabel.Text = "Loading...";
+            _currentStateLabel.Text = "Disconnected";
 
             //
             // GAME CODE UI BLOCK
@@ -224,8 +221,6 @@ namespace AmongUsCapture
             _gameCodeEntryField.Xalign = (float) 0.5;
             _gameCodeEntryField.SetSizeRequest(50, 20);
             _gameCodeEntryField.IsEditable = false;
-           
-            // CONNECT CODE UI BLOCK
 
             // HOST CONTROL UI BLOCK
 

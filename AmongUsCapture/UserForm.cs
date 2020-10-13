@@ -18,7 +18,6 @@ namespace AmongUsCapture
 {
     public partial class UserForm : Window
     {
-        // Member method because GTK likes to crash for no fucking reason
         private bool _autoscroll = false;
         
         private ClientSocket clientSocket;
@@ -69,7 +68,7 @@ namespace AmongUsCapture
             this.Default = _connectCodeSubmitButton;
 
             // Get the user's default GTK TextView foreground color.
-            NormalTextColor = GetRgbColorFromRgba(_consoleTextView.StyleContext.GetColor(Gtk.StateFlags.Normal));
+            NormalTextColor = GetRgbColorFromFloat(_consoleTextView.StyleContext.GetColor(Gtk.StateFlags.Normal));
 
         }
 
@@ -81,12 +80,9 @@ namespace AmongUsCapture
         private void _primaryWindowMenuItemAbout_Activated(object o, EventArgs e)
         {
             var abouticon = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
-            AboutDialog about = new AboutDialog();
-
-            about.Name = "_amonguscaptureGtkAboutDialog";
-            about.ProgramName = "Among Us Capture (GTK)";
             string version = String.Empty;
             string master = String.Empty;
+            List<String> contributorlist = new List<string>();
             
             using(Stream stream = Assembly.GetExecutingAssembly()
                 .GetManifestResourceStream("amonguscapture_gtk.version.txt"))
@@ -109,36 +105,53 @@ namespace AmongUsCapture
                     master = sreader.ReadToEnd();
                 }
             }
+            
+            using(Stream stream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("amonguscapture_gtk.contributors.txt"))
+            {
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string contrib;
+                    while ((contrib = reader.ReadLine()) != null)
+                    {
+                        contributorlist.Add(contrib);
+                    }
+                }
+            }
 
-            about.Icon = abouticon;
-            about.Version = version;
-            about.Authors = new[] {"TauAkiou (GTK Port)", "denverquane (Original Version)", "Other Contributors"};
-            about.Comments = "amonguscapture_gtk is a GTK version of the Among Us Capture utility." +
-                             $"\n\nBased on amonguscapture {master}";
-            about.Website = "https://github.com/TauAkiou/amonguscapture-gtk";
-            about.Logo = abouticon;
-
+            AboutDialog about = new AboutDialog()
+            {
+                Name = "_amonguscaptureGtkAboutDialog",
+                ProgramName = "Among Us Capture GTK",
+                Icon = abouticon,
+                Version = version,
+                Authors = contributorlist.ToArray(),
+                Comments = "Capture of the local Among Us executable state, cross-platform rewrite in GTK." +
+                $"\n\nBased on amonguscapture {master}",
+                Website = "https://github.com/TauAkiou/amonguscapture-gtk",
+                Logo = abouticon
+            };
+            
             about.Present();
             about.Run();
             
-
+            // Make sure the About dialog box is cleaned up.
             about.Dispose();
-
-
         }
 
         private void _consoleTextView_OnPopulateContextMenu(object o, PopulatePopupArgs e)
         {
             Menu textViewContextMenu = (Menu)e.Args[0];
             SeparatorMenuItem _contextMenuSeperator = new SeparatorMenuItem();
-            CheckMenuItem _autoscrollMenuItem = new CheckMenuItem();
-            
-            
-            _autoscrollMenuItem.Name = "_autoscrollMenuItem";
-            _autoscrollMenuItem.Label = "Auto Scroll";
-            _autoscrollMenuItem.TooltipText = "Enable or disable console autoscrolling";
-            _autoscrollMenuItem.Active = _autoscroll;
 
+            CheckMenuItem _autoscrollMenuItem = new CheckMenuItem()
+            {
+                Name = "_autoscrollMenuItem",
+                Label = "Auto Scroll",
+                TooltipText = "Enable or disable console autoscrolling",
+                Active = _autoscroll
+            };
+            
             _autoscrollMenuItem.Toggled += delegate(object sender, EventArgs args)
             {
                 // it has to be written this way to get around a crash.
@@ -150,7 +163,6 @@ namespace AmongUsCapture
             textViewContextMenu.Append(_contextMenuSeperator);
             textViewContextMenu.Append(_autoscrollMenuItem);
             textViewContextMenu.ShowAll();
-
         }
         
         
@@ -468,15 +480,13 @@ namespace AmongUsCapture
            
         }
 
-        private Color GetRgbColorFromRgba(RGBA gtkcolor)
+        private Color GetRgbColorFromFloat(RGBA gtkcolor)
         {
             // it's quick and sloppy, but these are GUI colors and don't have to be horribly accurate.
-            var A = (byte)(gtkcolor.Alpha * 255);
-            var R = (byte)(gtkcolor.Red * 255);
-            var G = (byte)(gtkcolor.Green * 255);
-            var B = (byte)(gtkcolor.Blue * 255);
-
-            return Color.FromArgb(A, R, G, B);
+            return Color.FromArgb((byte)(gtkcolor.Alpha * 255),
+                (byte)(gtkcolor.Red * 255),
+                (byte)(gtkcolor.Green * 255),
+                (byte)(gtkcolor.Blue * 255));
 
         }
     
