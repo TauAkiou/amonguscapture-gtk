@@ -1,53 +1,93 @@
-using AmongUsCapture.ConsoleTypes;
 using System;
+using System.Diagnostics;
+using System.IO.Pipes;
 using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using AmongUsCapture.CaptureGUI;
+using AmongUsCapture.ConsoleTypes;
+using CaptureGUI;
+using Microsoft.Win32;
+using SharedMemory;
 using Gtk;
 
 namespace AmongUsCapture
 {
-    static class Program
+    internal static class Program
     {
-        private static bool doConsole = false;
+        public static MainWindow window;
+        private static Mutex mutex = null;
+
         /// <summary>
-        ///  The main entry point for the application.
+        ///     The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main(string[] args)
         {
-            var appstate = new Application("org.AmongUsCapture.AmongUsCaptureUtil", GLib.ApplicationFlags.None);
-            appstate.Register(GLib.Cancellable.Current);
-            Application.Init();
-            
-            // This particular line is a Win32 system call and should only ever be run there
-            if(doConsole && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
+            if (Settings.PersistentSettings.debugConsole)
                 AllocConsole(); // needs to be the first call in the program to prevent weird bugs
+
+            var uriRes = IPCadapter.getInstance().HandleURIStart(args);
+            switch (uriRes)
+            {
+                case URIStartResult.CLOSE:
+                    Environment.Exit(0);
+                    break;
+                case URIStartResult.PARSE:
+                    Console.WriteLine($"Starting with args : {args[0]}");
+                    break;
+                case URIStartResult.CONTINUE:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
 
-            ClientSocket socket = new ClientSocket();
-            
-            var windowbuilder = new Builder();
-            var form = new UserForm(windowbuilder, socket);
-            Settings.conInterface = new FormConsole(form); //Create the Form Console interface. 
-            Task.Factory.StartNew(() => socket.Connect(Settings.PersistentSettings.host)); //synchronously force the socket to connect
-            Task.Factory.StartNew(() => GameMemReader.getInstance().RunLoop()); // run loop in background
-            //(new DebugConsole(debugGui)).Run();
-            
-            appstate.AddWindow(form);
-            form.DeleteEvent += (object o, DeleteEventArgs e) =>
-            {
-                Application.Quit();
-            };
 
-            form.ShowAll();
-            Application.Run();
-            //test
+            
+            var socket = new ClientSocket();
+            
+            //Create the Form Console interface. 
+            Task.Factory.StartNew(() => socket.Init()).Wait(); // run socket in background. Important to wait for init to have actually finished before continuing
+            var thread = new Thread(OpenGUI);
+            thread.SetApartmentState(ApartmentState.STA);
+            thread.Start();
+            while (Settings.conInterface is null) Thread.Sleep(250);
+            //Create the Form Console interface. 
+            Task.Factory.StartNew(() => socket.Init())
+                .Wait(); // run socket in background. Important to wait for init to have actually finished before continuing
+            IPCadapter.getInstance().RegisterMinion();
+            window.Loaded += (sender, eventArgs) =>
+            {
+                Task.Factory.StartNew(() => GameMemReader.getInstance().RunLoop()); // run loop in background
+                if (uriRes == URIStartResult.PARSE) IPCadapter.getInstance().SendToken(args[0]);
+            };
+            thread.Join();
         }
 
-        
+
+        private static void OpenGUI()
+        {
+            var a = new App();
+            window = new MainWindow();
+            a.MainWindow = window;
+            Settings.form = window;
+            Settings.conInterface = new FormConsole(window);
+            a.Run(window);
+            Environment.Exit(0);
+        }
+
+        public static string GetExecutablePath()
+        {
+            return Process.GetCurrentProcess().MainModule.FileName;
+        }
+
+
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool AllocConsole();
+        private static extern bool AllocConsole();
+
+        
     }
 }

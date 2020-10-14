@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
+    <OutputType>WinExe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>amonguscapture_gtk</RootNamespace>
   </PropertyGroup>
@@ -14,6 +14,8 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="GtkSharp" Version="3.22.25.128" />
+    <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.0.2" />
+    <PackageReference Include="SharedMemory" Version="2.2.3" />
     <PackageReference Include="SocketIOClient" Version="2.0.2.6" />
   </ItemGroup>
 

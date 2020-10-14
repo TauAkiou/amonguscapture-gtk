@@ -8,12 +8,17 @@ namespace AmongUsCapture
 {
     public class ProcessMemoryWindows : ProcessMemory
     {
+        private static bool is64Bit;
+        public static Process process;
+        public static List<Module> modules;
+
+        public static bool IsHooked => process != null && !process.HasExited;
+
         public override bool HookProcess(string name)
         {
-            IsHooked = process != null && !process.HasExited;
             if (!IsHooked)
             {
-                Process[] processes = Process.GetProcessesByName("Among Us");
+                Process[] processes = Process.GetProcessesByName(name);
                 if (processes.Length > 0)
                 {
                     process = processes[0];
@@ -24,8 +29,6 @@ namespace AmongUsCapture
                         is64Bit = Environment.Is64BitOperatingSystem && !flag;
 
                         LoadModules();
-
-                        IsHooked = true;
                     }
                 }
             }
