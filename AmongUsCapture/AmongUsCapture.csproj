@@ -19,6 +19,9 @@
 
   <ItemGroup>
     <EmbeddedResource Include="icon.ico" />
+    <EmbeddedResource Include="version.txt" />
+    <EmbeddedResource Include="master.txt" />
+    <EmbeddedResource Include="contributors.txt" />
   </ItemGroup>
 
   <ItemGroup>

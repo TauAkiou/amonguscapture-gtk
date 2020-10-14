@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
@@ -17,10 +18,14 @@ namespace AmongUsCapture
 {
     public partial class UserForm : Window
     {
+        private bool _autoscroll = false;
+        
         private ClientSocket clientSocket;
         private static Atom _atom = Atom.Intern("CLIPBOARD", false);
         private Clipboard _clipboard = Clipboard.Get(_atom);
+        private LobbyEventArgs lastJoinedLobby;
         public static Color NormalTextColor = Color.Black;
+        
         private Color Rainbow(float progress)
         {
             float div = (Math.Abs(progress % 1) * 6);
@@ -47,30 +52,119 @@ namespace AmongUsCapture
         public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
         {
             //builder.Autoconnect(this);
-            var pixbuf = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
-            Icon = pixbuf;
+            Icon = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
             clientSocket = sock;
             InitializeWindow();
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
             GameMemReader.getInstance().PlayerChanged += UserForm_PlayerChanged;
             GameMemReader.getInstance().ChatMessageAdded += OnChatMessageAdded;
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
-            
+
+            // Load URL
+            _urlHostEntryField.Text = Settings.PersistentSettings.host;
+
+            // Connect on Enter
+            //this.AcceptButton = ConnectButton;
+            this.Default = _connectCodeSubmitButton;
+
+            // Get the user's default GTK TextView foreground color.
+            NormalTextColor = GetRgbColorFromFloat(_consoleTextView.StyleContext.GetColor(Gtk.StateFlags.Normal));
+
         }
 
-        private void consoleTextView_OnRightClick(object o, ButtonPressEventArgs e)
+        private void _primaryWindowMenuQuitItem_Activated(object o, EventArgs e)
         {
-            if (e.Event.Button == 3)
+            this.Close();
+        }
+
+        private void _primaryWindowMenuItemAbout_Activated(object o, EventArgs e)
+        {
+            var abouticon = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
+            string version = String.Empty;
+            string master = String.Empty;
+            List<String> contributorlist = new List<string>();
+            
+            using(Stream stream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("amonguscapture_gtk.version.txt"))
+                if (stream == null)
+                    version = "Unknown";
+                else
+                {
+                    using (StreamReader sreader = new StreamReader(stream))
+                    {
+                        version = sreader.ReadToEnd();
+                    }
+                }
+            
+            using(Stream stream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("amonguscapture_gtk.master.txt"))
+            {    
+                // Contains the original tag/hash from the source build.
+                using (StreamReader sreader = new StreamReader(stream))
+                {
+                    master = sreader.ReadToEnd();
+                }
+            }
+            
+            using(Stream stream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("amonguscapture_gtk.contributors.txt"))
             {
-                Menu menu = new Menu();
-                MenuItem menu_item = new MenuItem("Autoscroll");
-                menu_item.Add(_autoScrollMenuItem);
-                menu.ShowAll();
-                menu.PopupAtWidget(menu, Gravity.South, Gravity.East, null);
+                using (StreamReader reader = new StreamReader(stream))
+                {
+                    string contrib;
+                    while ((contrib = reader.ReadLine()) != null)
+                    {
+                        contributorlist.Add(contrib);
+                    }
+                }
             }
 
-            NormalTextColor = Color.White;
+            AboutDialog about = new AboutDialog()
+            {
+                Name = "_amonguscaptureGtkAboutDialog",
+                ProgramName = "Among Us Capture GTK",
+                Icon = abouticon,
+                Version = version,
+                Authors = contributorlist.ToArray(),
+                Comments = "Capture of the local Among Us executable state, cross-platform rewrite in GTK." +
+                $"\n\nBased on amonguscapture {master}",
+                Website = "https://github.com/TauAkiou/amonguscapture-gtk",
+                Logo = abouticon
+            };
+            
+            about.Present();
+            about.Run();
+            
+            // Make sure the About dialog box is cleaned up.
+            about.Dispose();
         }
+
+        private void _consoleTextView_OnPopulateContextMenu(object o, PopulatePopupArgs e)
+        {
+            Menu textViewContextMenu = (Menu)e.Args[0];
+            SeparatorMenuItem _contextMenuSeperator = new SeparatorMenuItem();
+
+            CheckMenuItem _autoscrollMenuItem = new CheckMenuItem()
+            {
+                Name = "_autoscrollMenuItem",
+                Label = "Auto Scroll",
+                TooltipText = "Enable or disable console autoscrolling",
+                Active = _autoscroll
+            };
+            
+            _autoscrollMenuItem.Toggled += delegate(object sender, EventArgs args)
+            {
+                // it has to be written this way to get around a crash.
+                // don't know why, but i do what must be done.
+                var button = sender as CheckMenuItem;
+                _autoscroll = button.Active;
+            };
+
+            textViewContextMenu.Append(_contextMenuSeperator);
+            textViewContextMenu.Append(_autoscrollMenuItem);
+            textViewContextMenu.ShowAll();
+        }
+        
         
         private void OnJoinedLobby(object sender, LobbyEventArgs e)
         {
@@ -79,7 +173,7 @@ namespace AmongUsCapture
                 _gameCodeEntryField.Text = e.LobbyCode;
                 return false;
             });
-
+            lastJoinedLobby = e;
         }
         
         private void OnLoad(object sender, EventArgs e)
@@ -102,66 +196,25 @@ namespace AmongUsCapture
             Settings.conInterface.WriteModuleTextColored("CHAT", Color.DarkKhaki, $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Sender}{NormalTextColor.ToTextColor()}: {e.Message}");
             //WriteLineToConsole($"[CHAT] {e.Sender}: {e.Message}");
         }
-        
+
         /*
-         
-         /* GTK uses its own theming, so if you have a dark theme it will be used
-            automagically. */
-         
-        /*
-        private bool DarkTheme()
+        private void ConnectCodeBox_Enter(object sender, EventArgs e)
         {
-            bool is_dark_mode = false;
-            try
+            this.BeginInvoke((MethodInvoker)delegate ()
             {
-                var v = Microsoft.Win32.Registry.GetValue(@"HKEY_CURRENT_USER\Software\Microsoft\Windows\CurrentVersion\Themes\Personalize", "AppsUseLightTheme", "1");
-                if (v != null && v.ToString() == "0")
-                    is_dark_mode = true;
-            }
-            catch { }
-            return is_dark_mode;
+                ConnectCodeBox.Select(0, 0);
+            });
         }
-
-        private void EnableDarkTheme()
+        private void ConnectCodeBox_Click(object sender, EventArgs e)
         {
-            var BluePurpleAccent = Color.FromArgb(114, 137, 218);
-            var White = Color.White;
-            var AlmostWhite = Color.FromArgb(153, 170, 181);
-            var LighterGrey = Color.FromArgb(44, 47, 51);
-            var DarkGrey = Color.FromArgb(35, 39, 42);
+            if (ConnectCodeBox.Enabled)
+            {
+                this.BeginInvoke((MethodInvoker)delegate ()
+                {
+                    ConnectCodeBox.Select(0, 0);
+                });
+            }
 
-            ConsoleTextBox.BackColor = LighterGrey;
-            ConsoleTextBox.ForeColor = White;
-
-            ConsoleGroupBox.BackColor = DarkGrey;
-            ConsoleGroupBox.ForeColor = White;
-
-            UserSettings.BackColor = DarkGrey;
-            UserSettings.ForeColor = White;
-
-            CurrentStateGroupBox.BackColor = LighterGrey;
-            CurrentStateGroupBox.ForeColor = White;
-
-            ConnectCodeGB.BackColor = LighterGrey;
-            ConnectCodeGB.ForeColor = White;
-
-            ConnectCodeBox.BackColor = DarkGrey;
-            ConnectCodeBox.ForeColor = White;
-
-            SubmitButton.BackColor = BluePurpleAccent;
-            SubmitButton.ForeColor = White;
-
-            GameCodeBox.BackColor = DarkGrey;
-            GameCodeBox.ForeColor = White;
-
-            GameCodeGB.BackColor = LighterGrey;
-            GameCodeGB.ForeColor = White;
-
-            GameCodeCopyButton.BackColor = BluePurpleAccent;
-            GameCodeCopyButton.ForeColor = White;
-
-            BackColor = DarkGrey;
-            ForeColor = White;
         }
         */
 
@@ -170,6 +223,13 @@ namespace AmongUsCapture
             Settings.conInterface.WriteModuleTextColored("PlayerChange", Color.DarkKhaki, $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Name}{NormalTextColor.ToTextColor()}: {e.Action}");
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, e.Name + ": " + e.Action);
         }
+
+        /*
+        private void UserForm_Load(object sender, EventArgs e)
+        {
+            URLTextBox.Text = Settings.PersistentSettings.host;
+        }
+        */
 
         private void GameStateChangedHandler(object sender, GameStateChangedEventArgs e)
         {
@@ -184,22 +244,64 @@ namespace AmongUsCapture
 
         private void _connectCodeSubmitButton_Click(object sender, EventArgs e)
         {
-            if (_connectCodeEntryField.TextLength == 6)
+
+            _connectCodeEntryField.Sensitive = false;
+            _connectCodeSubmitButton.Sensitive = false;
+            _urlHostEntryField.Sensitive = false;
+
+            var url = "http://localhost:8123";
+            if (_urlHostEntryField.Text != "")
             {
-                clientSocket.SendConnectCode(_connectCodeEntryField.Text);
-                //ConnectCodeBox.Enabled = false;
-                //SubmitButton.Enabled = false;
+                url = _urlHostEntryField.Text;
+            }
+
+            doConnect(url);
+        }
+
+        private void doConnect(string url)
+        {
+            clientSocket.OnConnected += (sender, e) =>
+            {
+                Settings.PersistentSettings.host = url;
+
+                clientSocket.SendConnectCode(_connectCodeEntryField.Text, (sender, e) =>
+                {
+                    if (lastJoinedLobby != null) // Send the game code _after_ the connect code
+                    {
+                        clientSocket.SendRoomCode(lastJoinedLobby);
+                    }
+                });
+            };
+
+            try
+            {
+                clientSocket.Connect(url);
+            }
+            catch (Exception e)
+            {
+                //MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+                _connectCodeEntryField.Sensitive = true;
+                _connectCodeSubmitButton.Sensitive = true;
+                _urlHostEntryField.Sensitive = true;
+                return;
             }
         }
 
-        private void ConsoleTextBox_TextChanged(object sender, EventArgs e)
-        { /*
-            if (AutoScrollMenuItem.Checked)
+        /*
+        private void ConnectCodeBox_TextChanged(object sender, EventArgs e)
+        {
+            ConnectButton.Enabled = (ConnectCodeBox.Enabled && ConnectCodeBox.Text.Length == 6 && !ConnectCodeBox.Text.Contains(" "));
+        }
+        */
+
+        private void _consoleTextView_BufferChanged(object sender, EventArgs e)
+        { 
+            if (_autoscroll)
             {
-                ConsoleTextBox.SelectionStart = ConsoleTextBox.Text.Length;
-                ConsoleTextBox.ScrollToCaret();
+                var scrolladj = _consoleScrolledWindow.Vadjustment;
+                scrolladj.Value = scrolladj.Upper - scrolladj.PageSize;
             }
-            */
+            
         }
 
         private void TestFillConsole(int entries) //Helper test method to see if filling console works.
@@ -233,9 +335,9 @@ namespace AmongUsCapture
                 Idle.Add(delegate
                 {
                     var iter = _consoleTextView.Buffer.EndIter;
-                    _consoleTextView.Buffer.Insert(ref iter, addNewLine
-                        ? $"{line}{Environment.NewLine}"
-                        : line);
+                    _consoleTextView.Buffer.InsertMarkup(ref iter, addNewLine
+                        ? $"<span foreground=\"#{color.R.ToString("X2")}{color.G.ToString("X2")}{color.B.ToString("X2")}\">{line}</span>{Environment.NewLine}" 
+                        : $"<span foreground=\"#{color.R.ToString("X2")}{color.G.ToString("X2")}{color.B.ToString("X2")}\">{line}</span>");
                     _consoleTextView.Buffer.PlaceCursor(iter);
                 return false;
                 });
@@ -378,6 +480,16 @@ namespace AmongUsCapture
            
         }
 
+        private Color GetRgbColorFromFloat(RGBA gtkcolor)
+        {
+            // it's quick and sloppy, but these are GUI colors and don't have to be horribly accurate.
+            return Color.FromArgb((byte)(gtkcolor.Alpha * 255),
+                (byte)(gtkcolor.Red * 255),
+                (byte)(gtkcolor.Green * 255),
+                (byte)(gtkcolor.Blue * 255));
+
+        }
+    
     }
 
 }

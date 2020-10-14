@@ -1,8 +1,5 @@
 using AmongUsCapture.ConsoleTypes;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Gtk;
@@ -21,23 +18,15 @@ namespace AmongUsCapture
             var appstate = new Application("org.AmongUsCapture.AmongUsCaptureUtil", GLib.ApplicationFlags.None);
             appstate.Register(GLib.Cancellable.Current);
             Application.Init();
-            if(doConsole)
+            
+            // This particular line is a Win32 system call and should only ever be run there
+            if(doConsole && RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 AllocConsole(); // needs to be the first call in the program to prevent weird bugs
             }
-            /* This is winforms stuff and doesn't apply to GTK.
-            Application.SetHighDpiMode(HighDpiMode.SystemAware);
-            Application.EnableVisualStyles();
-            Application.SetCompatibleTextRenderingDefault(false);
-            */
-            
-            
-            ClientSocket socket = new ClientSocket();
 
-            string hostPath = "host.txt";
-          
-            //TODO make proper properties file
-            string host = File.Exists(hostPath) ? File.ReadAllText(hostPath) : "http://localhost:8123";
+            ClientSocket socket = new ClientSocket();
+            
             var windowbuilder = new Builder();
             var form = new UserForm(windowbuilder, socket);
             Settings.conInterface = new FormConsole(form); //Create the Form Console interface. 
@@ -60,6 +49,5 @@ namespace AmongUsCapture
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool AllocConsole();
-
     }
 }
