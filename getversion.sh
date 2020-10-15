@@ -1,13 +1,13 @@
 #!/bin/bash
 
 workflow() {
-	git_hash=$(git rev-parse --short "${GITHUB_SHA}")
+    GITHUB_SHA=3dca4d2b1cbc85787d02204a3a7f503a77b9b66c
+	git_hash=$(git rev-parse --short "$GITHUB_SHA" )
 	git_branch=${GITHUB_REF##*/}
 
-	echo ${GITHUB_SHA}
+	echo ${git_hash}
 
-
-	echo "git-beta-${GIT_HASH}" > AmongUsCapture/version.txt
+	echo "git-beta-${git_hash}" > AmongUsCapture/version.txt
 }
 
 normal() {
