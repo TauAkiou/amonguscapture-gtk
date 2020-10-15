@@ -1,5 +1,5 @@
 # amonguscapture-gtk <img src="AmongUsCapture/icon.ico" width="48">
-[![Build](https://github.com/TauAkiou/amonguscapture-gtk/workflows/Beta%20releases/badge.svg)](https://github.com/denverquane/amonguscapture/actions?query=Beta%20releases)
+[![Build](https://github.com/TauAkiou/amonguscapture-gtk/workflows/Beta%20releases/badge.svg)](https://github.com/tauakiou/amonguscapture-gtk/actions?query=Beta%20releases)
 
 Capture of the local Among Us executable state
 
@@ -8,6 +8,10 @@ The amonguscapture-gtk project brings the amonguscapture utility to other platfo
 AmongusCapture-gtk is currently supported under:
 * Windows
 * Linux
+
+Features that are currently only supported under Windows:
+* Client Verification
+* Discord IPC Links
 
 ## Requirements:
 

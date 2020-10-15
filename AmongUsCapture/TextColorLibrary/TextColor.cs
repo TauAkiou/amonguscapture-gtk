@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
-using System.Runtime.CompilerServices;
+using Pango;
+using Color = System.Drawing.Color;
 
-namespace TextColorLibrary
+namespace AmongUsCapture.TextColorLibrary
 {
     public static class TextColor
     {
@@ -18,6 +18,19 @@ namespace TextColorLibrary
         public static string ToTextColor(this Color tColor)
         {
             return FromColor(tColor);
+        }
+
+        public static string ToTextColorPango(this Color tColor)
+        {
+            Pango.Color col = new Pango.Color()
+                {
+                    Red = tColor.R,
+                    Green = tColor.G,
+                    Blue = tColor.B
+                };
+            AttrForeground textcolor = new AttrForeground(col);
+            return textcolor.ToString();
+
         }
 
         private static Color HexToColor(string Hex)
@@ -36,6 +49,15 @@ namespace TextColorLibrary
             red = Math.Clamp(red, 0, 255);
             green = Math.Clamp(green, 0, 255);
             blue = Math.Clamp(blue, 0, 255);
+            return colorIndicator + red.ToString("X2") + green.ToString("X2") + blue.ToString("X2");
+        }
+
+        public static string FromFloat(float red, float green, float blue)
+        {
+            red = red * 255;
+            green = green * 255;
+            blue = blue * 255;
+
             return colorIndicator + red.ToString("X2") + green.ToString("X2") + blue.ToString("X2");
         }
 
@@ -75,6 +97,37 @@ namespace TextColorLibrary
             }
 
             return outputList;
+        }
+        public static string getRainbowText(string nonRainbow, int shift = 0)
+        {
+            string OutputString = "";
+            for (int i = 0; i < nonRainbow.Length; i++)
+            {
+                OutputString += Rainbow((float)((i+shift)% nonRainbow.Length) / nonRainbow.Length).ToTextColor() + nonRainbow[i];
+            }
+            return OutputString;
+        }
+        public static Color Rainbow(float progress)
+        {
+            float div = (Math.Abs(progress % 1) * 6);
+            int ascending = (int)((div % 1) * 255);
+            int descending = 255 - ascending;
+
+            switch ((int)div)
+            {
+                case 0:
+                    return Color.FromArgb(255, 255, ascending, 0);
+                case 1:
+                    return Color.FromArgb(255, descending, 255, 0);
+                case 2:
+                    return Color.FromArgb(255, 0, 255, ascending);
+                case 3:
+                    return Color.FromArgb(255, 0, descending, 255);
+                case 4:
+                    return Color.FromArgb(255, ascending, 0, 255);
+                default: // case 5:
+                    return Color.FromArgb(255, 255, 0, descending);
+            }
         }
     }
 }

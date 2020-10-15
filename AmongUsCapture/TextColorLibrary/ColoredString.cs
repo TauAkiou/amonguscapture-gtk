@@ -1,6 +1,7 @@
-﻿using System.Drawing;
+﻿using System;
+using System.Drawing;
 
-namespace TextColorLibrary
+namespace AmongUsCapture.TextColorLibrary
 {
     public class ColoredString
     {
@@ -13,6 +14,11 @@ namespace TextColorLibrary
         public override string ToString()
         {
             return $"Text: {text} Color: {textColor.ToString()}";
+        }
+
+        public string ToPangoString()
+        {
+            throw new NotImplementedException();
         }
 
         public string text { get; set; }
