@@ -38,6 +38,14 @@
   <PropertyGroup>
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
+  
+  <Target Name="GetGitHash" BeforeTargets="BeforeBuild">
+      <Message Importance="high" Text="Test Message" />
+      <Exec Command="echo test" />
+      <Exec Command="git describe --tags > version.txt" />
+  </Target>
+
+  
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
