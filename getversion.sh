@@ -1,7 +1,6 @@
 #!/bin/bash
 
 workflow() {
-    GITHUB_SHA=3dca4d2b1cbc85787d02204a3a7f503a77b9b66c
 	git_hash=$(git rev-parse --short "$GITHUB_SHA" )
 	git_branch=${GITHUB_REF##*/}
 
@@ -17,7 +16,7 @@ normal() {
 	fi
 
 	git_line=$(git describe --tag)
-	echo ${git_line} > AmongUsCapture/version.txt
+	echo "$git_line" > AmongUsCapture/version.txt
 }
 
 if [[ $1 == "workflow" ]]; then
