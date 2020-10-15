@@ -11,11 +11,8 @@ workflow() {
 }
 
 normal() {
-	if [[ -f "AmongUsCapture/version.txt" ]]; then
-		echo "Already found a version.txt"
-		return 0
-	elif [[ -z "$GITHUB_SHA" ]]; then
-		echo "Already in the github build environment.
+	if [[ ! -z "$GITHUB_SHA" ]]; then
+		echo "Already in the github build environment."
 		return 0
 	fi
 
