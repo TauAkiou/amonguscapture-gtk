@@ -1,5 +1,5 @@
 # amonguscapture-gtk <img src="AmongUsCapture/icon.ico" width="48">
-[![Build](https://github.com/TauAkiou/amonguscapture-gtk/workflows/Beta%20releases/badge.svg)](https://github.com/denverquane/amonguscapture/actions?query=Beta%20releases)
+[![Build](https://github.com/TauAkiou/amonguscapture-gtk/workflows/Beta%20releases/badge.svg)](https://github.com/tauakiou/amonguscapture-gtk/actions?query=Beta%20releases)
 
 Capture of the local Among Us executable state
 
