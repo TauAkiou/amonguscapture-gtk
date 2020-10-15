@@ -39,10 +39,8 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   
-  <Target Name="GetGitHash" BeforeTargets="BeforeBuild">
-      <Message Importance="high" Text="Test Message" />
-      <Exec Command="echo test" />
-      <Exec Command="git describe --tags > version.txt" />
+  <Target Name="GetGitHash" BeforeTargets="BeforeBuild" Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux))) ">
+      <Exec Command="bash ../getversion.sh normal" />
   </Target>
 
   
