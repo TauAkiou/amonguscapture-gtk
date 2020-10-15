@@ -6,10 +6,6 @@
     <RootNamespace>amonguscapture_gtk</RootNamespace>
   </PropertyGroup>
 
-  <PropertyGroup>
-    <PublishReadyToRun>false</PublishReadyToRun>
-  </PropertyGroup>
-
   <ItemGroup>
     <PackageReference Include="Config.Net" Version="4.15.0" />
     <PackageReference Include="Config.Net.Json" Version="4.15.0" />
