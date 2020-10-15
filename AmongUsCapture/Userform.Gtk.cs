@@ -256,7 +256,7 @@ namespace AmongUsCapture
             _connectCodeEntryField.Name = "_connectCodeEntryField";
             _connectCodeEntryField.Xalign = (float)0.5;
             _connectCodeEntryField.SetSizeRequest(70, 20);
-            _connectCodeEntryField.MaxLength = 6;
+            _connectCodeEntryField.MaxLength = 8;
 
             _connectCodeSubmitButton.Name = "_connectCodeSubmitButton";
             _connectCodeSubmitButton.Label = "Submit";
@@ -281,6 +281,7 @@ namespace AmongUsCapture
 
             _consoleTextView.Name = "_consoleTextView";
             _consoleTextView.Editable = false;
+            _consoleTextView.WrapMode = WrapMode.Word;
 
             //_autoScrollCheckMenuItem.Name = "_autoscrollMenuItem";
             _consoleTextView.PopulatePopup += _consoleTextView_OnPopulateContextMenu;

@@ -2,21 +2,22 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
+using System.Reflection;
 using AmongUsCapture.TextColorLibrary;
-using CaptureGUI;
 
 namespace AmongUsCapture.ConsoleTypes
 {
     public class FormConsole : ConsoleInterface
     {
         private StreamWriter logFile;
-        public MainWindow form;
+        public UserForm form;
         private static object locker = new Object();
 
-        public FormConsole(MainWindow userForm)
+        public FormConsole(UserForm userForm)
         {
             form = userForm;
-            logFile = File.CreateText(Path.Combine(Directory.GetParent(Program.GetExecutablePath()).FullName, "CaptureLog.txt"));
+            var directoryuri = Assembly.GetEntryAssembly().GetName().CodeBase.Substring(7);
+            logFile = File.CreateText(Path.Combine(Directory.GetParent(directoryuri).ToString(), "CaptureLog.txt"));
         }
 
         public void WriteTextFormatted(string text, bool acceptNewLines = true)

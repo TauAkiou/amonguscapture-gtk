@@ -1,8 +1,8 @@
 using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using AmongUsCapture.TextColorLibrary;
-using CaptureGUI;
 using SocketIOClient;
 
 namespace AmongUsCapture
@@ -21,7 +21,15 @@ namespace AmongUsCapture
             socket = new SocketIO();
 
             // Handle tokens from protocol links.
-            IPCadapter.getInstance().OnToken += OnTokenHandler;
+            
+            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
+                IPCadapter.getInstance().OnToken += OnTokenHandler;
+            }
+            else
+            {
+                   // Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
+                      //  "Linux does not support IPC communication. IPC links will not work.");
+            }
 
             // Register handlers for game-state change events.
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
@@ -43,7 +51,7 @@ namespace AmongUsCapture
                 socket.EmitAsync("connectCode", ConnectCode).ContinueWith((_) =>
                 {
                     Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
-                        $"Connection code ({Color.Red.ToTextColor()}{ConnectCode}{MainWindow.NormalTextColor.ToTextColor()}) sent to server.");
+                        $"Connection code ({Color.Red.ToTextColor()}{ConnectCode}) sent to server.");
                     GameMemReader.getInstance().ForceUpdatePlayers();
                     GameMemReader.getInstance().ForceTransmitState();
                     GameMemReader.getInstance().ForceTransmitLobby();
@@ -132,7 +140,7 @@ namespace AmongUsCapture
             if (!socket.Connected) return;
             socket.EmitAsync("lobby", JsonSerializer.Serialize(e));
             Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
-                $"Room code ({Color.Yellow.ToTextColor()}{e.LobbyCode}{MainWindow.NormalTextColor.ToTextColor()}) sent to server.");
+                $"Room code ({Color.Yellow.ToTextColor()}{e.LobbyCode}) sent to server.");
         }
 
         public class ConnectedEventArgs : EventArgs

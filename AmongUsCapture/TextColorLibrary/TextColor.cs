@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
+using Pango;
+using Color = System.Drawing.Color;
 
 namespace AmongUsCapture.TextColorLibrary
 {
@@ -17,6 +18,19 @@ namespace AmongUsCapture.TextColorLibrary
         public static string ToTextColor(this Color tColor)
         {
             return FromColor(tColor);
+        }
+
+        public static string ToTextColorPango(this Color tColor)
+        {
+            Pango.Color col = new Pango.Color()
+                {
+                    Red = tColor.R,
+                    Green = tColor.G,
+                    Blue = tColor.B
+                };
+            AttrForeground textcolor = new AttrForeground(col);
+            return textcolor.ToString();
+
         }
 
         private static Color HexToColor(string Hex)
@@ -35,6 +49,15 @@ namespace AmongUsCapture.TextColorLibrary
             red = Math.Clamp(red, 0, 255);
             green = Math.Clamp(green, 0, 255);
             blue = Math.Clamp(blue, 0, 255);
+            return colorIndicator + red.ToString("X2") + green.ToString("X2") + blue.ToString("X2");
+        }
+
+        public static string FromFloat(float red, float green, float blue)
+        {
+            red = red * 255;
+            green = green * 255;
+            blue = blue * 255;
+
             return colorIndicator + red.ToString("X2") + green.ToString("X2") + blue.ToString("X2");
         }
 

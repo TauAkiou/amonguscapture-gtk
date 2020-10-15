@@ -1,8 +1,7 @@
 ﻿using System;
 using System.IO;
-using System.Windows;
-using CaptureGUI;
 using Config.Net;
+using Gtk;
 
 namespace AmongUsCapture
 {
@@ -14,7 +13,7 @@ namespace AmongUsCapture
 
         public static Application app;
 
-        public static MainWindow form;
+        public static UserForm form;
 
         //Global persistent settings that are saved to a json file. Limited Types
         public static IPersistentSettings PersistentSettings = new ConfigurationBuilder<IPersistentSettings>().UseJsonFile(Path.Join(StorageLocation, "Settings.json")).Build();

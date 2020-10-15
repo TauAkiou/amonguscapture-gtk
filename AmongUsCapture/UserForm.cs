@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 using Gdk;
 using GLib;
 using Gtk;
@@ -12,6 +14,7 @@ using Menu = Gtk.Menu;
 using MenuItem = Gtk.MenuItem;
 using Window = Gtk.Window;
 using AmongUsCapture.TextColorLibrary;
+using Object = Atk.Object;
 
 namespace AmongUsCapture
 {
@@ -24,7 +27,7 @@ namespace AmongUsCapture
         private Clipboard _clipboard = Clipboard.Get(_atom);
         private LobbyEventArgs lastJoinedLobby;
         public static Color NormalTextColor = Color.Black;
-        private static object locker = new Object();
+        private static object locker = new object();
         private Queue<string> deadMessageQueue = new Queue<string>();
 
         
@@ -52,7 +55,7 @@ namespace AmongUsCapture
             }
         }
       
-        public UserForm(Builder builder, ClientSocket sock) : base("Among Us Capture - GTK")
+        public UserForm(ClientSocket sock) : base("Among Us Capture - GTK")
         {
             //builder.Autoconnect(this);
             Icon = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
@@ -62,7 +65,10 @@ namespace AmongUsCapture
             GameMemReader.getInstance().PlayerChanged += UserForm_PlayerChanged;
             GameMemReader.getInstance().ChatMessageAdded += OnChatMessageAdded;
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
-
+            GameMemReader.getInstance().GameUnverified += _eventGameIsPirated;
+            
+            
+            
             // Load URL
             _urlHostEntryField.Text = Settings.PersistentSettings.host;
 
@@ -74,6 +80,24 @@ namespace AmongUsCapture
             NormalTextColor = GetRgbColorFromFloat(_consoleTextView.StyleContext.GetColor(Gtk.StateFlags.Normal));
 
         }
+
+        
+        private void _eventGameIsPirated(object o, EventArgs e)
+        {
+            GameMemReader.getInstance().cracked = false;
+            // Messageboxes appear to be completely fucked in GTKSharp.
+            // Only real option here is to write to console.
+            
+            Settings.conInterface.WriteModuleTextColored("Notification", Color.Red,
+                $"We have detected an unverified version of Among Us. Things may not work properly.");
+            Idle.Add(delegate {
+                _consoleParentFrame.Label = "Console - Unverified Version; Things May Not Work Properly";
+                _consoleParentFrame.TooltipText =
+                    "We have detected an unverified version of Among Us. Please support the official release.";
+                return false;
+            });
+        }
+        
 
         private void _primaryWindowMenuQuitItem_Activated(object o, EventArgs e)
         {
@@ -259,9 +283,10 @@ namespace AmongUsCapture
                 url = _urlHostEntryField.Text;
             }
 
-            doConnect(url, connectCode);
+            doConnect(url);
         }
         
+        /*
         public void setColor(MetroColorStyle color)
         {
             BeginInvoke((MethodInvoker) delegate
@@ -272,16 +297,18 @@ namespace AmongUsCapture
                 metroStyleManager1.Style = color;
             });
         }
+        */
+        
         private void doConnect(string url)
         {
             try
             {
-                clientSocket.OnTokenHandler(null, new StartToken() { Host = url, ConnectCode = connectCode });
+                clientSocket.OnTokenHandler(null, new StartToken() { Host = url, ConnectCode = _connectCodeEntryField.Text });
             }
             catch (Exception e)
             {
                 // TODO: Add GTK code for error box here
-                MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+                //MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
                 _connectCodeEntryField.Sensitive = true;
                 _connectCodeSubmitButton.Sensitive = true;
                 _urlHostEntryField.Sensitive = true;
@@ -305,6 +332,7 @@ namespace AmongUsCapture
             //}
         }
 
+        /*
         private void DoAutoScroll()
         {
             if (AutoScrollMenuItem.Checked)
@@ -314,6 +342,7 @@ namespace AmongUsCapture
                     ConsoleTextBox.ScrollToCaret();
                 });
         }
+        */
 
         private void _consoleTextView_BufferChanged(object sender, EventArgs e)
         { 
@@ -353,7 +382,7 @@ namespace AmongUsCapture
                     AppendColoredTextToConsole(part.text, part.textColor);
                 AppendColoredTextToConsole("", Color.White, true);
             }
-            autoscroll();
+            //autoscroll();
         }
 
         public void AppendColoredTextToConsole(string line, Color color, bool addNewLine = false)
@@ -387,7 +416,7 @@ namespace AmongUsCapture
                     });
                 }
 
-                autoscroll();
+                //autoscroll();
             }
         }
 
@@ -585,15 +614,17 @@ namespace AmongUsCapture
                         return false;
                     }
 
-                    autoscroll();
+                    //autoscroll();
                 });
+            }
         }
 
         public void ShowCrackedBox()
-        {
+        {   /*
             var result =
                 MessageBox.Show("You are running a cracked version of Among Us. We do not support piracy.",
                     "ERROR", MessageBoxButtons.OK, MessageBoxIcon.Error, MessageBoxDefaultButton.Button1, MessageBoxOptions.DefaultDesktopOnly);
+            */
         }
 
         private void _gameCodeCopyButton_Click(object sender, EventArgs e)

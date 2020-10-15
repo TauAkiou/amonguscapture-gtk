@@ -76,6 +76,8 @@ namespace AmongUsCapture
 
         private static void RegisterProtocol()
         {
+            // Literally code that only works under Windows. 
+            #if _WINDOWS
             using (var key = Registry.CurrentUser.CreateSubKey("SOFTWARE\\Classes\\" + UriScheme))
             {
                 // Replace typeof(App) by the class that contains the Main method or any class located in the project that produces the exe.
@@ -95,6 +97,10 @@ namespace AmongUsCapture
                     commandKey.SetValue("", "\"" + applicationLocation + "\" \"%1\"");
                 }
             }
+            #endif
+            #if _LINUX
+                
+            #endif
         }
 
         public void RegisterMinion()
