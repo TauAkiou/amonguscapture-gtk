@@ -1,10 +1,10 @@
 #!/bin/bash
 
 workflow() {
-	git_hash=$(git rev-parse --short "$GITHUB_SHA")
+	git_hash=$(git rev-parse --short "${GITHUB_SHA}")
 	git_branch=${GITHUB_REF##*/}
 
-	echo $(GITHUB_SHA)
+	echo ${GITHUB_SHA}
 
 
 	echo "git-beta-${GIT_HASH}" > AmongUsCapture/version.txt
