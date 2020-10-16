@@ -65,13 +65,13 @@ namespace AmongUsCapture
             //Create the Form Console interface. 
             Task.Factory.StartNew(() => socket.Init())
                 .Wait(); // run socket in background. Important to wait for init to have actually finished before continuing
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) IPCadapter.getInstance().RegisterMinion();
+            Task.Factory.StartNew(() => IPCadapter.getInstance().RegisterMinion());
 
             // Add a GLib Idle handler to fix the issue here. 
             Idle.Add(delegate
             {
                 Task.Factory.StartNew(() => GameMemReader.getInstance().RunLoop()); // run loop in background
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && uriRes == URIStartResult.PARSE)
+                if (uriRes == URIStartResult.PARSE)
                     IPCadapter.getInstance().SendToken(args[0]);
                 return false;
             });

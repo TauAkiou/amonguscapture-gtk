@@ -17,6 +17,7 @@
     <PackageReference Include="NamedPipeServerStream.NetFrameworkVersion" Version="1.0.2" />
     <PackageReference Include="SharedMemory" Version="2.2.3" />
     <PackageReference Include="SocketIOClient" Version="2.0.2.6" />
+    <PackageReference Include="Tmds.DBus" Version="0.9.0" />
   </ItemGroup>
 
   <ItemGroup>

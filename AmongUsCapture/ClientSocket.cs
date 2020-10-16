@@ -25,11 +25,6 @@ namespace AmongUsCapture
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
                 IPCadapter.getInstance().OnToken += OnTokenHandler;
             }
-            else
-            {
-                   // Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
-                      //  "Linux does not support IPC communication. IPC links will not work.");
-            }
 
             // Register handlers for game-state change events.
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
