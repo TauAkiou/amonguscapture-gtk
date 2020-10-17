@@ -296,9 +296,12 @@ namespace AmongUsCapture
         //
         // https://man7.org/linux/man-pages/man2/process_vm_readv.2.html
         
-        [DllImport("libc.so.6", SetLastError = true)]
+        [DllImport("libc", SetLastError = true)]
         public static extern int process_vm_readv(int pid, IntPtr local_iov, ulong liovcnt, IntPtr remote_iov,
             ulong riovcnt, ulong flags);
+        
+        [DllImport("libc", SetLastError = true)]
+        private static extern int chmod(string pathname, int mode);
     }
 
 

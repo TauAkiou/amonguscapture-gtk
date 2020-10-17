@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.IO.Pipes;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -34,6 +35,11 @@ namespace AmongUsCapture
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Settings.PersistentSettings.debugConsole)
                 AllocConsole(); // needs to be the first call in the program to prevent weird bugs
 
+            if (!Directory.Exists(Settings.StorageLocation))
+            {
+                // Create Settings directory if it doesn't exist, as we need to stick our pidfile there.
+                Directory.CreateDirectory(Settings.StorageLocation);
+            }
             
             URIStartResult uriRes = URIStartResult.CLOSE;
             uriRes = IPCadapter.getInstance().HandleURIStart(args);
@@ -87,17 +93,17 @@ namespace AmongUsCapture
             
             window.DeleteEvent += (object o, DeleteEventArgs e) =>
             {
+                // Make sure the pid file is deleted if the application quits.
+                CleanPid();
                 Application.Quit();
             };
-
-            // Post a quick message to the console if we are using Linux, notifying the user that IPC links do not work.
-            
-            Settings.conInterface.WriteModuleTextColored("Notification", Color.Red,
-                $"You are running amonguscapture under Linux. Discord capture links are not currently supported. Use the manual details in your DM instead.");
 
             window.ShowAll();
 
             Application.Run();
+            
+            CleanPid();
+            
             Environment.Exit(0);
         }
 
@@ -106,11 +112,37 @@ namespace AmongUsCapture
             return Process.GetCurrentProcess().MainModule.FileName;
         }
 
+        private static void CleanPid()
+        {
+            // Make sure the pidfile is cleaned up if we have one.
+            var pidfile = Path.Join(Settings.StorageLocation, ".amonguscapture.pid");
+
+            if (File.Exists(pidfile))
+            {
+                int pid;
+                bool fileread;
+                using (var pidread = File.OpenText(Path.Join(Settings.StorageLocation, ".amonguscapture.pid")))
+                {
+                    fileread = Int32.TryParse(pidread.ReadLine(), out pid);
+                }
+
+                if (!fileread)
+                {
+                    // Bad read, file must be corrupt. Clear pidfile.
+                    File.Delete(pidfile);
+                }
+
+                if (pid == Process.GetCurrentProcess().Id)
+                {
+                    // This is our process. Delete file.
+                    File.Delete(pidfile);
+                }
+            }
+        }
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool AllocConsole();
-
         
     }
 }

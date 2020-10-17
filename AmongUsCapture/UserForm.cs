@@ -66,9 +66,7 @@ namespace AmongUsCapture
             GameMemReader.getInstance().ChatMessageAdded += OnChatMessageAdded;
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
             GameMemReader.getInstance().GameUnverified += _eventGameIsPirated;
-            
-            
-            
+
             // Load URL
             _urlHostEntryField.Text = Settings.PersistentSettings.host;
 

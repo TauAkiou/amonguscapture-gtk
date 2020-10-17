@@ -5,7 +5,7 @@
     },
     "AmongUsCaptureIPC": {
       "commandName": "Project",
-      "commandLineArgs": "aucapture://localhost:8123/3A9CD4A1?insecure"
+      "commandLineArgs": "aucapture://localhost:8123/E68A0AD9?insecure"
     }
   }
 }
