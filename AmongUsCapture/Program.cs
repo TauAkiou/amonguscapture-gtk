@@ -36,9 +36,7 @@ namespace AmongUsCapture
 
             
             URIStartResult uriRes = URIStartResult.CLOSE;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                uriRes = IPCadapter.getInstance().HandleURIStart(args);
+            uriRes = IPCadapter.getInstance().HandleURIStart(args);
                 switch (uriRes)
                 {
                     case URIStartResult.CLOSE:
@@ -52,9 +50,8 @@ namespace AmongUsCapture
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-            }
 
-            socket = new ClientSocket();
+                socket = new ClientSocket();
             
             //Create the Form Console interface. 
             Task.Factory.StartNew(() => socket.Init()).Wait(); // run socket in background. Important to wait for init to have actually finished before continuing

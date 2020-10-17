@@ -17,8 +17,10 @@ namespace AmongUsCapture.DBus
     class IPCadapterDBus : IPCadapter
     {
         private Thread _dbusProcessingThread;
-        private CancellationTokenSource _cancellation;
+        private CancellationTokenSource _cancellation = new CancellationTokenSource();
+        private Connection _dbusconnection;
         private IConnectLink _ipclink;
+        private bool _isListening;
 
         public override URIStartResult HandleURIStart(string[] args)
         {
@@ -58,16 +60,21 @@ namespace AmongUsCapture.DBus
             
         }
 
-        public override bool SendToken(string jsonText)
+        public override async Task<bool> SendToken(string jsonText)
         {
+            while (!_isListening)
+            {
+                Thread.Sleep(1000);
+            }
+            
             // Send the token via DBus.
             using (Connection conn = new Connection(Address.Session))
             {
-                conn.ConnectAsync();
+                await conn.ConnectAsync();
                 
                 var obj = new IPCLink();
-                conn.RegisterObjectAsync(obj);
-                conn.RegisterServiceAsync("org.amonguscapture", ServiceRegistrationOptions.None);
+                await conn.RegisterObjectAsync(obj);
+                await conn.RegisterServiceAsync("org.AmongUsCapture.ipc", ServiceRegistrationOptions.None);
 
                 obj.ConnectLink = jsonText;
             }
@@ -83,15 +90,28 @@ namespace AmongUsCapture.DBus
 
         public async override Task RegisterMinion()
         {
-            using (var connection = new Connection(Address.Session))
+            Task.Factory.StartNew( async () =>
             {
-                await connection.ConnectAsync();
-                    
-                    _ipclink  = connection.CreateProxy<IConnectLink>("org.amonguscapture.linkipc",
-                        "/AmongUsCapture/LinkIPC");
+
+                using (_dbusconnection = new Connection(Address.Session))
+                {
+                    await _dbusconnection.ConnectAsync();
+
+                    _ipclink = _dbusconnection.CreateProxy<IConnectLink>("org.AmongUsCapture.ConnectLink",
+                        "/org/AmongUsCapture/ConnectLink");
 
                     await _ipclink.WatchConnectInfoAsync(RespondToDbus);
-            }
+
+                    _isListening = true;
+
+                    while (!_cancellation.IsCancellationRequested)
+                    {
+                        _cancellation.Token.ThrowIfCancellationRequested();
+                        await Task.Delay(int.MaxValue);
+                    }
+                }
+            });
+            
         }
 
         public override void startWithToken(string uri)
@@ -113,8 +133,10 @@ namespace AmongUsCapture.DBus
         private void RespondToDbus(string signalresponse)
         {
             Settings.conInterface.WriteModuleTextColored("DBus", Color.Silver,
-                $"$Recieved new message on DBus: {signalresponse}");
-
+                $"Recieved new message on DBus: {signalresponse}");
+            
+            
+            
             OnTokenChanged(StartToken.FromString(signalresponse));
         }
     }

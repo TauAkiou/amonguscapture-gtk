@@ -49,7 +49,7 @@ namespace AmongUsCapture.Windows
             OnTokenChanged(st);
         }
 
-        public override bool SendToken(string jsonText)
+        public async override Task<bool> SendToken(string jsonText)
         {
             var rpcGru = new RpcBuffer(appName); //Soup told me not to but its funny
             var RPCresult = rpcGru.RemoteRequest(Encoding.UTF8.GetBytes(jsonText));

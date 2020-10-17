@@ -25,6 +25,7 @@ namespace AmongUsCapture
         protected const string UriScheme = "aucapture";
         protected const string FriendlyName = "AmongUs Capture";
         protected Mutex mutex;
+        
 
 
         
@@ -61,7 +62,7 @@ namespace AmongUsCapture
         }
 
         public abstract URIStartResult HandleURIStart(string[] args);
-        public abstract bool SendToken(string jsonText);
+        public abstract Task<bool> SendToken(string jsonText);
         public abstract void SendToken(string host, string connectCode);
         public abstract Task RegisterMinion();
         public abstract void startWithToken(string uri);

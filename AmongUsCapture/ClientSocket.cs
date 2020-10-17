@@ -2,6 +2,7 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Text.Json;
+using System.Threading.Tasks;
 using AmongUsCapture.TextColorLibrary;
 using SocketIOClient;
 
@@ -21,12 +22,9 @@ namespace AmongUsCapture
             socket = new SocketIO();
 
             // Handle tokens from protocol links.
-            
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) {
-                IPCadapter.getInstance().OnToken += OnTokenHandler;
-            }
+            IPCadapter.getInstance().OnToken += OnTokenHandler;
 
-            // Register handlers for game-state change events.
+                // Register handlers for game-state change events.
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
             GameMemReader.getInstance().PlayerChanged += PlayerChangedHandler;
             GameMemReader.getInstance().JoinedLobby += JoinedLobbyHandler;
@@ -89,14 +87,14 @@ namespace AmongUsCapture
                 $"{Color.Red.ToTextColor()}{message}");
         }
 
-        private void Connect(string url, string connectCode)
+        private async Task Connect(string url, string connectCode)
         {
             try
             {
                 ConnectCode = connectCode;
                 socket.ServerUri = new Uri(url);
                 if (socket.Connected) socket.DisconnectAsync().Wait();
-                socket.ConnectAsync().ContinueWith(t =>
+                await socket.ConnectAsync().ContinueWith(t =>
                 {
                     if (!t.IsCompletedSuccessfully)
                     {

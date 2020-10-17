@@ -4,7 +4,7 @@ using Tmds.DBus;
 
 namespace AmongUsCapture.DBus
 {
-    [DBusInterface("org.amonguscapture")]
+    [DBusInterface("org.AmongUsCapture.ConnectLink")]
     public interface IConnectLink : IDBusObject
     {
         Task<IDisposable> WatchConnectInfoAsync(Action<string> handler);
@@ -22,7 +22,7 @@ namespace AmongUsCapture.DBus
                 SentLink?.Invoke(_connectlink);
             }
         }
-        public ObjectPath ObjectPath => new ObjectPath("/org/amonguscapture/ipclink");
+        public ObjectPath ObjectPath => new ObjectPath("/org/AmongUsCapture/ConnectLink");
         public event Action<string> SentLink;
         
         public Task<IDisposable> WatchConnectInfoAsync(Action<string> handler)
