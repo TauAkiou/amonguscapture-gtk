@@ -22,13 +22,7 @@ namespace AmongUsCapture.TextColorLibrary
 
         public static string ToTextColorPango(this Color tColor, string writestring)
         {
-            Pango.Color col = new Pango.Color()
-                {
-                    Red = tColor.R,
-                    Green = tColor.G,
-                    Blue = tColor.B
-                };
-            return $"<span foreground=\"#{col.Red.ToString("X2")}{col.Green.ToString("X2")}{col.Blue.ToString("X2")}\">{writestring}</span>";
+            return $"<span foreground=\"#{tColor.R.ToString("X2")}{tColor.G.ToString("X2")}{tColor.B.ToString("X2")}\">{writestring}</span>";
         }
 
         private static Color HexToColor(string Hex)

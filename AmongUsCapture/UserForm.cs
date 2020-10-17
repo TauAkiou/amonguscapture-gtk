@@ -79,7 +79,6 @@ namespace AmongUsCapture
 
         }
 
-        
         private void _eventGameIsPirated(object o, EventArgs e)
         {
             GameMemReader.getInstance().cracked = false;
@@ -218,20 +217,7 @@ namespace AmongUsCapture
         {
             Settings.conInterface.WriteModuleTextColored("CHAT", Color.DarkKhaki,
                 $"{PlayerColorToColorOBJ(e.Color).ToTextColorPango(e.Sender)}{e.Message}");
-            //WriteLineToConsole($"[CHAT] {e.Sender}: {e.Message}");
         }
-        /*
-        private void ConnectCodeBox_Enter(object sender, EventArgs e)
-        {
-            BeginInvoke((MethodInvoker) delegate { ConnectCodeBox.Select(0, 0); });
-        }
-
-        private void ConnectCodeBox_Click(object sender, EventArgs e)
-        {
-            if (ConnectCodeBox.Enabled)
-                BeginInvoke((MethodInvoker) delegate { ConnectCodeBox.Select(0, 0); });
-        }
-        */
 
         private void UserForm_PlayerChanged(object sender, PlayerChangedEventArgs e)
         {
@@ -243,14 +229,7 @@ namespace AmongUsCapture
                     $"{PlayerColorToColorOBJ(e.Color).ToTextColorPango(e.Name)}: {e.Action}");
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, e.Name + ": " + e.Action);
         }
-
-        /*
-        private void UserForm_Load(object sender, EventArgs e)
-        {
-            URLTextBox.Text = Settings.PersistentSettings.host;
-        }
-        */
-
+        
         private void GameStateChangedHandler(object sender, GameStateChangedEventArgs e)
         {
             while (deadMessageQueue.Count > 0) //Lets print out the state changes now that gamestate has changed.
@@ -284,19 +263,6 @@ namespace AmongUsCapture
             doConnect(url);
         }
         
-        /*
-        public void setColor(MetroColorStyle color)
-        {
-            BeginInvoke((MethodInvoker) delegate
-            {
-                Style = color;
-                metroStyleExtender1.Style = color;
-                metroStyleManager1.Style = color;
-                metroStyleManager1.Style = color;
-            });
-        }
-        */
-        
         private void doConnect(string url)
         {
             try
@@ -320,28 +286,7 @@ namespace AmongUsCapture
             ConnectButton.Enabled = (ConnectCodeBox.Enabled && ConnectCodeBox.Text.Length == 8 && ConnectCodeBox.MaskCompleted);
         }
         */
-
-        private void ConsoleTextBox_TextChanged(object sender, EventArgs e)
-        {
-            //if (AutoScrollMenuItem.Checked && canAutoScroll)
-            //{
-            //    ConsoleTextBox.SelectionStart = ConsoleTextBox.Text.Length;
-            //    ConsoleTextBox.ScrollToCaret();
-            //}
-        }
-
-        /*
-        private void DoAutoScroll()
-        {
-            if (AutoScrollMenuItem.Checked)
-                ConsoleTextBox.BeginInvoke((MethodInvoker) delegate
-                {
-                    ConsoleTextBox.SelectionStart = ConsoleTextBox.Text.Length;
-                    ConsoleTextBox.ScrollToCaret();
-                });
-        }
-        */
-
+        
         private void _consoleTextView_BufferChanged(object sender, EventArgs e)
         { 
             if (_autoscroll)
