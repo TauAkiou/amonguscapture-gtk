@@ -1,5 +1,7 @@
 using System;
 using System.Diagnostics;
+using System.IO;
+using System.Net;
 using System.Security.Policy;
 using System.Text;
 using System.Threading;
@@ -85,7 +87,7 @@ namespace AmongUsCapture.DBus
         public override void SendToken(string host, string connectCode)
         {
             var st = new StartToken {ConnectCode = connectCode, Host = host};
-            OnTokenChanged(st);
+            OnTokenEvent(st);
         }
 
         public async override Task RegisterMinion()
@@ -116,7 +118,7 @@ namespace AmongUsCapture.DBus
 
         public override void startWithToken(string uri)
         {
-            OnTokenChanged(StartToken.FromString(uri));
+            OnTokenEvent(StartToken.FromString(uri));
         }
 
         public override bool Cancel()
@@ -134,10 +136,12 @@ namespace AmongUsCapture.DBus
         {
             Settings.conInterface.WriteModuleTextColored("DBus", Color.Silver,
                 $"Recieved new message on DBus: {signalresponse}");
-            
-            
-            
-            OnTokenChanged(StartToken.FromString(signalresponse));
+
+            signalresponse = signalresponse.Trim('\r', '\n');
+
+            var token = StartToken.FromString(signalresponse);
+
+            OnTokenEvent(token);
         }
     }
     

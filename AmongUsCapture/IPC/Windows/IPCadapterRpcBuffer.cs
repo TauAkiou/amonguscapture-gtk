@@ -46,7 +46,7 @@ namespace AmongUsCapture.Windows
         public override void SendToken(string host, string connectCode)
         {
             var st = new StartToken {ConnectCode = connectCode, Host = host};
-            OnTokenChanged(st);
+            OnTokenEvent(st);
         }
 
         public async override Task<bool> SendToken(string jsonText)
@@ -90,7 +90,7 @@ namespace AmongUsCapture.Windows
                 var serverResponse = "Carbon has a huge pp also this is debug messages.";
                 var gotData = Encoding.UTF8.GetString(payload, 0, payload.Length);
                 Console.WriteLine($"RPCMinion: Got data: {gotData}");
-                OnTokenChanged(StartToken.FromString(gotData));; //Invoke method and return.
+                OnTokenEvent(StartToken.FromString(gotData));; //Invoke method and return.
                 return Encoding.UTF8.GetBytes(serverResponse);
             });
             return Task.CompletedTask;
@@ -98,7 +98,7 @@ namespace AmongUsCapture.Windows
 
         public override void startWithToken(string uri)
         {
-            OnTokenChanged(StartToken.FromString(uri));;
+            OnTokenEvent(StartToken.FromString(uri));;
         }
     }
 }

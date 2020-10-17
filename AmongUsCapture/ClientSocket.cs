@@ -22,7 +22,7 @@ namespace AmongUsCapture
             socket = new SocketIO();
 
             // Handle tokens from protocol links.
-            IPCadapter.getInstance().OnToken += OnTokenHandler;
+            IPCadapter.getInstance().OnToken += async (s, e) => await OnTokenHandler(s, e);
 
                 // Register handlers for game-state change events.
             GameMemReader.getInstance().GameStateChanged += GameStateChangedHandler;
@@ -64,20 +64,20 @@ namespace AmongUsCapture
             };
         }
 
-        public void OnTokenHandler(object sender, StartToken token)
+        public async Task OnTokenHandler(object sender, StartToken token)
         {
             Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
                 $"Attempting to connect to host {Color.LimeGreen.ToTextColor()}{token.Host}{Color.White.ToTextColor()} with connect code {Color.Red.ToTextColor()}{token.ConnectCode}{Color.White.ToTextColor()}");
             if (socket.Connected)
                 // Disconnect from the existing host...
-                socket.DisconnectAsync().ContinueWith((t) =>
+                await socket.DisconnectAsync().ContinueWith(async (t) =>
                 {
                     // ...then connect to the new one.
-                    Connect(token.Host, token.ConnectCode);
+                    await Connect(token.Host, token.ConnectCode);
                 });
             else
                 // Connect using the host and connect code specified by the token.
-                Connect(token.Host, token.ConnectCode);
+                await Connect(token.Host, token.ConnectCode);
         }
 
         private void OnConnectionFailure(AggregateException e = null)
@@ -93,7 +93,7 @@ namespace AmongUsCapture
             {
                 ConnectCode = connectCode;
                 socket.ServerUri = new Uri(url);
-                if (socket.Connected) socket.DisconnectAsync().Wait();
+                if (socket.Connected) await socket.DisconnectAsync();
                 await socket.ConnectAsync().ContinueWith(t =>
                 {
                     if (!t.IsCompletedSuccessfully)

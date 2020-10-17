@@ -55,7 +55,7 @@ namespace AmongUsCapture
         }
         
         public event EventHandler<StartToken> OnToken;
-        protected virtual void OnTokenChanged(StartToken e)
+        protected virtual void OnTokenEvent(StartToken e)
         {
             // Safely raise the event for all subscribers
             OnToken?.Invoke(this, e);
@@ -90,6 +90,7 @@ namespace AmongUsCapture
         {
             try
             {
+                rawToken = new string(rawToken.Where(c => !char.IsControl(c)).ToArray());
                 Uri uri = new Uri(rawToken);
                 NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);
                 bool insecure = (nvc["insecure"] != null && nvc["insecure"] != "false") || uri.Query == "?insecure";
