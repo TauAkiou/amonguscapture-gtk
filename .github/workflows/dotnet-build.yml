@@ -23,12 +23,12 @@ jobs:
         run: dotnet restore "AmongUsCapture\AmongUsCapture.csproj"
       - name: Publish
         run: |
-          dotnet publish "AmongUsCapture\AmongUsCapture.csproj" -p:PublishProfile=FolderProfile -p:AssemblyVersion=0.0.1
+          dotnet publish "AmongUsCapture\AmongUsCapture.csproj" -p:PublishProfile=FolderProfile -p:AssemblyVersion=0.0.1 -p:PublishReadyToRunShowWarnings=true
       - name: Relocate
         run: |
-          mv AmongUsCapture/bin/publish/linux-x64/AmongUsCapture AmongUsCapture-linux-x64
+          mv AmongUsCapture/bin/publish/linux-x64/AmongUsCapture AmongUsCapture-gtk-linux-x64
       - name: AmongUsCapture-beta
         uses: actions/upload-artifact@v2
         with:
           name: AmongUsCapture-beta
-          path: AmongUsCapture-linux-x64
+          path: AmongUsCapture-gtk-linux-x64

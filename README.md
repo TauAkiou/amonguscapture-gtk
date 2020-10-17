@@ -56,31 +56,18 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
 
 #### Instructions: 
 
-I'm currently having some trouble with the makefile, so here are some manual instructions:
 ```
 - git clone https://github.com/TauAkiou/amonguscapture-gtk
 
-- git checkout linux-mem-new
-
 - cd amonguscapture-gtk
 
-- git rev-parse HEAD > AmongUsCapture/version.txt
-
 - dotnet build -c <release/debug>
+```
 
-Your code will be in amonguscapture-gtk/bin/<Release/Debug>/netcoreapp3.1>
+Your code will be in amonguscapture-gtk/bin/<Release/Debug>/netcoreapp3.1> as "amonguscapture.dll".
+
+If you want a 
 
 ```
 
-Makefile instructions for when I get it working again:
-
-    - git clone https://github.com/TauAkiou/amonguscapture-gtk/tree/linux-mem-new
-    
-    For release builds:
-    - cd amonguscapture-gtk 
-    - 'make' or 'make release'
-    
-    For debug builds:
-    - cd amonguscapture-gtk
-    - 'make debug'
 
