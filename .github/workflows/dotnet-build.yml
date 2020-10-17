@@ -23,7 +23,7 @@ jobs:
         run: dotnet restore "AmongUsCapture\AmongUsCapture.csproj"
       - name: Publish
         run: |
-          dotnet publish "AmongUsCapture\AmongUsCapture.csproj" -p:PublishProfile=FolderProfile -p:AssemblyVersion=0.0.1 -p:PublishReadyToRunShowWarnings=true
+          dotnet publish "AmongUsCapture\AmongUsCapture.csproj" -p:PublishProfile=FolderProfile -p:AssemblyVersion=0.0.1
       - name: Relocate
         run: |
           mv AmongUsCapture/bin/publish/linux-x64/AmongUsCapture AmongUsCapture-gtk-linux-x64
