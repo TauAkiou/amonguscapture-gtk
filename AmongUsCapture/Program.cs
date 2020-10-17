@@ -7,6 +7,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading;
 using AmongUsCapture.ConsoleTypes;
+using AmongUsCapture.TextColorLibrary;
 using GLib;
 using Microsoft.Win32;
 using SharedMemory;
@@ -34,6 +35,7 @@ namespace AmongUsCapture
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Settings.PersistentSettings.debugConsole)
                 AllocConsole(); // needs to be the first call in the program to prevent weird bugs
 
+            var testpango = Color.Green.ToTextColorPango("test");
             
             URIStartResult uriRes = URIStartResult.CLOSE;
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))

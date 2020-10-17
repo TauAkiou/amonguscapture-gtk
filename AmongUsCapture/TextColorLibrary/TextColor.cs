@@ -20,7 +20,7 @@ namespace AmongUsCapture.TextColorLibrary
             return FromColor(tColor);
         }
 
-        public static string ToTextColorPango(this Color tColor)
+        public static string ToTextColorPango(this Color tColor, string writestring)
         {
             Pango.Color col = new Pango.Color()
                 {
@@ -28,9 +28,7 @@ namespace AmongUsCapture.TextColorLibrary
                     Green = tColor.G,
                     Blue = tColor.B
                 };
-            AttrForeground textcolor = new AttrForeground(col);
-            return textcolor.ToString();
-
+            return $"<span foreground=\"#{col.Red.ToString("X2")}{col.Green.ToString("X2")}{col.Blue.ToString("X2")}\">{writestring}</span>";
         }
 
         private static Color HexToColor(string Hex)

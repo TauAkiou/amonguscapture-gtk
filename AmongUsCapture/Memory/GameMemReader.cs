@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Runtime.InteropServices;
+using AmongUsCapture.TextColorLibrary;
 using GLib;
 using Gtk;
 using Thread = System.Threading.Thread;
@@ -74,7 +75,7 @@ namespace AmongUsCapture
                     }
 
                     Settings.conInterface.WriteModuleTextColored("GameMemReader", Color.Lime,
-                        $"Connected to Among Us process ({ProcessMemory.getInstance().process.Id})");
+                        $"Connected to Among Us process ({Color.Red.ToTextColorPango(ProcessMemory.getInstance().process.Id.ToString())})");
 
 
                     var foundModule = false;
@@ -89,7 +90,7 @@ namespace AmongUsCapture
                                 {
                                     cracked = true;
                                     Settings.conInterface.WriteModuleTextColored("GameVerifier", Color.Red,
-                                        $"Client verification: FAIL.");
+                                        $"Client verification: {Color.Red.ToTextColorPango("FAIL")}");
                                 }
                                 else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                                 {
@@ -100,7 +101,7 @@ namespace AmongUsCapture
                                 {
                                     cracked = false;
                                     Settings.conInterface.WriteModuleTextColored("GameVerifier", Color.Red,
-                                        $"Client verification: PASS.");
+                                        $"Client verification: {Color.Lime.ToTextColorPango("PASS")}");
                                 }
 
                                 foundModule = true;

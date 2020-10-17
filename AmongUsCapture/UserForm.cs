@@ -67,8 +67,6 @@ namespace AmongUsCapture
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
             GameMemReader.getInstance().GameUnverified += _eventGameIsPirated;
             
-            
-            
             // Load URL
             _urlHostEntryField.Text = Settings.PersistentSettings.host;
 
@@ -219,7 +217,7 @@ namespace AmongUsCapture
         private void OnChatMessageAdded(object sender, ChatMessageEventArgs e)
         {
             Settings.conInterface.WriteModuleTextColored("CHAT", Color.DarkKhaki,
-                $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Sender}{NormalTextColor.ToTextColor()}: {e.Message}");
+                $"{PlayerColorToColorOBJ(e.Color).ToTextColorPango(e.Sender)}{e.Message}");
             //WriteLineToConsole($"[CHAT] {e.Sender}: {e.Message}");
         }
         /*
@@ -239,10 +237,10 @@ namespace AmongUsCapture
         {
             if (e.Action == PlayerAction.Died)
                 deadMessageQueue.Enqueue(
-                    $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Name}{NormalTextColor.ToTextColor()}: {e.Action}");
+                    $"{PlayerColorToColorOBJ(e.Color).ToTextColorPango(e.Name)}: {e.Action}");
             else
                 Settings.conInterface.WriteModuleTextColored("PlayerChange", Color.DarkKhaki,
-                    $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Name}{NormalTextColor.ToTextColor()}: {e.Action}");
+                    $"{PlayerColorToColorOBJ(e.Color).ToTextColorPango(e.Name)}: {e.Action}");
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, e.Name + ": " + e.Action);
         }
 
@@ -266,7 +264,7 @@ namespace AmongUsCapture
                 _currentStateLabel.Text = e.NewState.ToString();
                 return false;
             });
-            Settings.conInterface.WriteModuleTextColored("GameMemReader", Color.Lime, $"State changed to {Color.Cyan.ToTextColor()}{e.NewState}");
+            Settings.conInterface.WriteModuleTextColored("GameMemReader", Color.Lime, $"State changed to {Color.Cyan.ToTextColorPango(e.NewState.ToString())}");
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, "State changed to " + e.NewState);
         }
 
