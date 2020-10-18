@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using SharedMemory;
 using Mutex = System.Threading.Mutex;
 using Process = System.Diagnostics.Process;
+#pragma warning disable 4014
 
 namespace AmongUsCapture.Windows
 {

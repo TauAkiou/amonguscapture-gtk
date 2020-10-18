@@ -66,7 +66,7 @@ namespace AmongUsCapture
             while (Settings.conInterface is null) Thread.Sleep(250);
             Task.Factory.StartNew(() => socket.Init())
                 .Wait(); // run socket in background. Important to wait for init to have actually finished before continuing
-            Task.Factory.StartNew(() => IPCadapter.getInstance().RegisterMinion());
+            Task.Factory.StartNew(() => IPCadapter.getInstance().RegisterMinion()).Wait();
 
             // Add a GLib Idle handler to fix the issue here. 
             Idle.Add(delegate
@@ -93,16 +93,15 @@ namespace AmongUsCapture
             
             window.DeleteEvent += (object o, DeleteEventArgs e) =>
             {
-                // Make sure the pid file is deleted if the application quits.
-                CleanPid();
+                // Make sure that the IPC adapter has a chance to clean up after itself.
+                IPCadapter.getInstance().Cancel().Wait();
                 Application.Quit();
             };
 
             window.ShowAll();
 
             Application.Run();
-            
-            CleanPid();
+            IPCadapter.getInstance().Cancel().Wait();
             
             Environment.Exit(0);
         }
@@ -111,34 +110,7 @@ namespace AmongUsCapture
         {
             return Process.GetCurrentProcess().MainModule.FileName;
         }
-
-        private static void CleanPid()
-        {
-            // Make sure the pidfile is cleaned up if we have one.
-            var pidfile = Path.Join(Settings.StorageLocation, ".amonguscapture.pid");
-
-            if (File.Exists(pidfile))
-            {
-                int pid;
-                bool fileread;
-                using (var pidread = File.OpenText(Path.Join(Settings.StorageLocation, ".amonguscapture.pid")))
-                {
-                    fileread = Int32.TryParse(pidread.ReadLine(), out pid);
-                }
-
-                if (!fileread)
-                {
-                    // Bad read, file must be corrupt. Clear pidfile.
-                    File.Delete(pidfile);
-                }
-
-                if (pid == Process.GetCurrentProcess().Id)
-                {
-                    // This is our process. Delete file.
-                    File.Delete(pidfile);
-                }
-            }
-        }
+        
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]

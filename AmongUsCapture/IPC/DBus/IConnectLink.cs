@@ -7,27 +7,19 @@ namespace AmongUsCapture.DBus
     [DBusInterface("org.AmongUsCapture.ConnectLink")]
     public interface IConnectLink : IDBusObject
     {
-        Task<IDisposable> WatchConnectInfoAsync(Action<string> handler);
+        Task SendConnectUriAsync(string uri);
     }
     
     public class IPCLink : IConnectLink
     {
-        string _connectlink;
-        public string ConnectLink
-        {
-            get { return _connectlink; }
-            set 
-            {
-                _connectlink = value;
-                SentLink?.Invoke(_connectlink);
-            }
-        }
         public ObjectPath ObjectPath => new ObjectPath("/org/AmongUsCapture/ConnectLink");
         public event Action<string> SentLink;
         
-        public Task<IDisposable> WatchConnectInfoAsync(Action<string> handler)
+        public Task SendConnectUriAsync(string uri)
         {
-            return SignalWatcher.AddAsync(this, nameof(SentLink), handler);
+            // Call event and send URI.
+            SentLink?.Invoke(uri);
+            return Task.CompletedTask;
         }
     }
 }

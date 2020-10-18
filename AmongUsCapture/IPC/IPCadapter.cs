@@ -26,9 +26,6 @@ namespace AmongUsCapture
         protected const string FriendlyName = "AmongUs Capture";
         protected Mutex mutex;
         
-
-
-        
         private static IPCadapter instance;
         public static IPCadapter getInstance()
         {
@@ -68,7 +65,7 @@ namespace AmongUsCapture
         public abstract void startWithToken(string uri);
 
         // This method is for implementations that might be cancelable - such as DBUS.
-        public virtual bool Cancel()
+        public virtual async Task<bool> Cancel()
         {
             return true;
         }

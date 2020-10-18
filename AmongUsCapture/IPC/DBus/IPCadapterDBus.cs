@@ -22,12 +22,11 @@ namespace AmongUsCapture.DBus
 {
     class IPCadapterDBus : IPCadapter
     {
-        private Thread _dbusProcessingThread;
         private CancellationTokenSource _cancellation = new CancellationTokenSource();
-        private Connection _dbusconnection;
-        private IConnectLink _ipclink;
-        private bool _isListening;
-
+        private bool _serverIsStarted;
+        private bool _isHostInstance;
+        private Task _serverTask;
+        
         public override URIStartResult HandleURIStart(string[] args)
         {
             var myProcessId = Process.GetCurrentProcess().Id;
@@ -43,13 +42,13 @@ namespace AmongUsCapture.DBus
             Console.WriteLine(Program.GetExecutablePath());
 
             //mutex = new Mutex(true, appName, out var createdNew);
-            bool createdNew = false;
+            _isHostInstance = false;
             var wasURIStart = args.Length > 0 && args[0].StartsWith(UriScheme + "://");
             var result = URIStartResult.CONTINUE;
 
             if (!File.Exists(Path.Join(Settings.StorageLocation, ".amonguscapture.pid")))
             {
-                createdNew = true;
+                _isHostInstance = true;
             }
             else
             {
@@ -66,38 +65,35 @@ namespace AmongUsCapture.DBus
                             var capproc = Process.GetProcessById(pidint);
                             var assmbname = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
                             var runnername = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
-
-                            if (!capproc.ProcessName.Contains("dotnet"))
+                            var iscapture = false;
+                            
+                            foreach (ProcessModule mod in capproc.Modules)
                             {
-                                // We're just going to assume that a dotnet process that matches this set of parameters
-                                // is a running capture process.
-                                throw new ArgumentException();
-
+                                // If we find amonguscapturedll in the modules, we can be certain
+                                // that the located pid is, in fact, an AmongUsCapture process.
+                                if (mod.ModuleName == "AmongUsCapture.dll")
+                                {
+                                    iscapture = true;
+                                    break;
+                                }
                             }
-                            else if (!capproc.ProcessName.Contains(Path.GetFileName(runnername)))
-                            {
-                                throw new ArgumentException();
-                            }
 
-
-                            if (capproc.HasExited)
-                            {
+                            if (!iscapture || capproc.HasExited)
                                 throw new ArgumentException();
-                            }
                         }
                         catch (ArgumentException e)
                         {
                             // Process doesn't exist. Clear the file.
                             Console.WriteLine($"Found stale PID file containing {pid}.");
                             File.Delete(Path.Join(Settings.StorageLocation, ".amonguscapture.pid"));
-                            createdNew = true;
+                            _isHostInstance = true;
                         }
                     }
                 }
 
             }
 
-            if (createdNew)
+            if (_isHostInstance)
             {
                 using (var pidwriter = File.CreateText(Path.Join(Settings.StorageLocation, ".amonguscapture.pid")))
                 {
@@ -106,7 +102,7 @@ namespace AmongUsCapture.DBus
             }
             
 
-            if (!createdNew) // send it to already existing instance if applicable, then close
+            if (!_isHostInstance) // send it to already existing instance if applicable, then close
             {
                 if (wasURIStart) SendToken(args[0]).Wait();
 
@@ -114,12 +110,10 @@ namespace AmongUsCapture.DBus
             }
             else if (wasURIStart) // URI start on new instance, continue as normal but also handle current argument
             {
-                // if we are running, we create a file lock with our process in it.
-                // Also attach the pid delete handler from Program.
-
                 result = URIStartResult.PARSE;
             }
 
+            // Register the xdg-mime handler for discord links.
             RegisterProtocol();
 
             return result;
@@ -136,9 +130,15 @@ namespace AmongUsCapture.DBus
             if (!File.Exists(xdg_file))
             {
                 var executingassmb = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                Console.WriteLine(executingassmb);
                 if (Path.HasExtension("dll"))
                 {
                     executingassmb = "dotnet " + executingassmb;
+                }
+                else
+                {
+                    executingassmb = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    Console.WriteLine(executingassmb);
                 }
 
                 var xdg_file_write = new string[]
@@ -189,16 +189,20 @@ namespace AmongUsCapture.DBus
 
         public override async Task<bool> SendToken(string jsonText)
         {
+            // Delay the send until we know for certain the server is started.
+            // If this isn't a host instance, we don't care.
+            while (!_serverIsStarted && _isHostInstance)
+                await Task.Delay(500);
+
             // Send the token via DBus.
             using (Connection conn = new Connection(Address.Session))
             {
                 await conn.ConnectAsync();
+                
+                var _ipclink = conn.CreateProxy<IConnectLink>("org.AmongUsCapture.ConnectLink",
+                    "/org/AmongUsCapture/ConnectLink");
 
-                var obj = new IPCLink();
-                await conn.RegisterObjectAsync(obj);
-                await conn.RegisterServiceAsync("org.AmongUsCapture.ipc", ServiceRegistrationOptions.None);
-
-                obj.ConnectLink = jsonText;
+                await _ipclink.SendConnectUriAsync(jsonText);
             }
 
             return true;
@@ -210,30 +214,38 @@ namespace AmongUsCapture.DBus
             OnTokenEvent(st);
         }
 
-        public async override Task RegisterMinion()
+        public override Task RegisterMinion()
         {
-            Task.Factory.StartNew(async () =>
+            _serverTask = Task.Factory.StartNew(async () =>
             {
-
-                using (_dbusconnection = new Connection(Address.Session))
+                try
                 {
-                    await _dbusconnection.ConnectAsync();
-
-                    _ipclink = _dbusconnection.CreateProxy<IConnectLink>("org.AmongUsCapture.ConnectLink",
-                        "/org/AmongUsCapture/ConnectLink");
-
-                    await _ipclink.WatchConnectInfoAsync(RespondToDbus);
-
-                    _isListening = true;
-
-                    while (!_cancellation.IsCancellationRequested)
+                    using (Connection conn = new Connection(Address.Session))
                     {
-                        _cancellation.Token.ThrowIfCancellationRequested();
-                        await Task.Delay(int.MaxValue);
+                        await conn.ConnectAsync();
+
+                        var obj = new IPCLink();
+                        await conn.RegisterObjectAsync(obj);
+                        await conn.RegisterServiceAsync("org.AmongUsCapture.ConnectLink",
+                            ServiceRegistrationOptions.None);
+
+                        obj.SentLink += RespondToDbus;
+
+                        _serverIsStarted = true;
+                        
+                        while (!_cancellation.IsCancellationRequested)
+                        {
+                            _cancellation.Token.ThrowIfCancellationRequested();
+                            await Task.Delay(int.MaxValue);
+                        }
                     }
                 }
+                catch (OperationCanceledException e)
+                {
+                    Console.WriteLine("Cancel called - terminating DBus loop.");
+                }
             });
-
+            return Task.CompletedTask;
         }
 
         public override void startWithToken(string uri)
@@ -241,24 +253,54 @@ namespace AmongUsCapture.DBus
             OnTokenEvent(StartToken.FromString(uri));
         }
 
-        public override bool Cancel()
+        public override async Task<bool> Cancel()
         {
             if (!_cancellation.IsCancellationRequested)
             {
                 _cancellation.Cancel();
+                await CleanPid();
+                await _serverTask;
                 return true;
             }
 
             return false;
         }
 
+        private Task CleanPid()
+        {
+            // Make sure the pidfile is cleaned up if we have one.
+            var pidfile = Path.Join(Settings.StorageLocation, ".amonguscapture.pid");
+
+            if (File.Exists(pidfile))
+            {
+                int pid;
+                bool fileread;
+                using (var pidread = File.OpenText(Path.Join(Settings.StorageLocation, ".amonguscapture.pid")))
+                {
+                    fileread = Int32.TryParse(pidread.ReadLine(), out pid);
+                }
+
+                if (!fileread)
+                {
+                    // Bad read, file must be corrupt. Clear pidfile.
+                    File.Delete(pidfile);
+                }
+
+                if (pid == Process.GetCurrentProcess().Id)
+                {
+                    // This is our process. Delete file.
+                    File.Delete(pidfile);
+                }
+            }
+
+            return Task.CompletedTask;
+        }
+
         private void RespondToDbus(string signalresponse)
         {
             Settings.conInterface.WriteModuleTextColored("DBus", Color.Silver,
-                $"Received new message on DBus: \"{signalresponse}\"");
-
-            signalresponse = signalresponse.Trim('\r', '\n');
-
+                $"Received DBus Method Call: \"{signalresponse}\"");
+            
             var token = StartToken.FromString(signalresponse);
 
             OnTokenEvent(token);
