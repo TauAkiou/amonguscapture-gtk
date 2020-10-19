@@ -60,7 +60,7 @@ namespace AmongUsCapture
 
         public event EventHandler<LobbyEventArgs> JoinedLobby;
 
-        public bool cracked = false;
+        public bool cracked = true;
 
         public void RunLoop()
         {

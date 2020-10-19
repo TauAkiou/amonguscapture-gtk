@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Castle.DynamicProxy;
 
 
 namespace AmongUsCapture
@@ -64,7 +65,25 @@ namespace AmongUsCapture
         public override void LoadModules()
         {
             modules = new List<Module>();
+
+            foreach (ProcessModule mod in process.Modules)
+            {
+                if (mod.ModuleName == "GameAssembly.dll")
+                {
+                    modules.Add(new Module()
+                    {
+                        Name = mod.ModuleName,
+                        BaseAddress = mod.BaseAddress,
+                        FileName = mod.FileName,
+                        MemorySize = (uint) mod.ModuleMemorySize,
+                        EntryPointAddress = IntPtr.Zero
+
+                    });
+                    break;
+                }
+            }
             
+            /*
             // Read /proc/<pid>/maps for library mapping information.
             // Reading from /proc/<pid>/maps is negligible, since this file is a kernel pseudofile.
             if (!File.Exists($"/proc/{process.Id}/maps"))
@@ -122,7 +141,7 @@ namespace AmongUsCapture
                 FileName = librarypath,
                 MemorySize = memsize,
                 EntryPointAddress = IntPtr.Zero
-            });
+            }); */
 
         }
 
@@ -296,7 +315,7 @@ namespace AmongUsCapture
         //
         // https://man7.org/linux/man-pages/man2/process_vm_readv.2.html
         
-        [DllImport("libc.so.6", SetLastError = true)]
+        [DllImport("libc", SetLastError = true)]
         public static extern int process_vm_readv(int pid, IntPtr local_iov, ulong liovcnt, IntPtr remote_iov,
             ulong riovcnt, ulong flags);
     }

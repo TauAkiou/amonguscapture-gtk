@@ -13,6 +13,9 @@ Features that are currently only supported under Windows:
 * Client Verification
 * Discord IPC Links
 
+## Prebuilt Releases
+Prebuilt releases are available here: [prebuilt releases](https://github.com/TauAkiou/amonguscapture-gtk/releases)
+
 ## Requirements:
 
 ### Windows:
@@ -29,13 +32,11 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
 
 ## Building
 
-
-
 ### Windows
 
 
 * .NET Core SDK: https://dotnet.microsoft.com/download
-* Visual Studio (Recommended)
+* Visual Studio
 ```
     - Create a new file: 'version.txt' in the AmongUsCapture/ directory.
     - Loading the 'AmongUsCapture.sln' file and building should be sufficient enough.
@@ -49,6 +50,8 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
   - 'dotnet build --configuration Release' for release builds
   - 'dotnet build --configuration Debug' for debug builds
 ```
+
+
     
 ### Linux
 * .NET Core 3.1 SDK: https://docs.microsoft.com/en-us/dotnet/core/install/linux
@@ -66,8 +69,13 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
 
 Your code will be in amonguscapture-gtk/bin/<Release/Debug>/netcoreapp3.1> as "amonguscapture.dll".
 
-If you want a 
+If you want a standalone executable: 
 
 ```
+- cd amonguscapture-gtk
+
+- dotnet publish "AmongUsCapture\AmongUsCapture.csproj" -p:PublishProfile=FolderProfile -p:AssemblyVersion=0.0.1
+```
+
 
 

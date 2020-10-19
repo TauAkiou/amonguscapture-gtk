@@ -82,17 +82,46 @@ namespace AmongUsCapture
         private void _eventGameIsPirated(object o, EventArgs e)
         {
             GameMemReader.getInstance().cracked = false;
-            // Messageboxes appear to be completely fucked in GTKSharp.
-            // Only real option here is to write to console.
-            
+
+            Gtk.Application.Invoke((obj, e) =>
+            {
+                var pirateBox = new MessageDialog(this,
+                    DialogFlags.Modal,
+                    MessageType.Warning,
+                    ButtonsType.None,
+                    false,
+                    "We have detected an unverified version of Among Us. The capture way not work properly." +
+                    "\n\nWe cannot provide support for pirated/cracked versions of the game. Please consider buying the game from Steam.",
+                    new object[] { });
+
+                var marea = pirateBox.MessageArea as Box;
+
+                marea.Add(new LinkButton("https://store.steampowered.com/app/945360/Among_Us/", "Open Steam Store"));
+
+                pirateBox.AddButton("Quit", ResponseType.Reject);
+                pirateBox.AddButton("I Understand", ResponseType.Accept);
+                
+                pirateBox.Response += delegate(object o1, ResponseArgs args)
+                {
+                    if (args.ResponseId == ResponseType.Reject)
+                    {
+                        Close();
+                    }
+
+                    if (args.ResponseId == ResponseType.Accept)
+                    {
+                        GameMemReader.getInstance().cracked = false;
+                    }
+                };
+                
+                pirateBox.ShowAll();
+                pirateBox.Run();
+                pirateBox.Dispose();
+            });
+
+
             Settings.conInterface.WriteModuleTextColored("Notification", Color.Red,
                 $"We have detected an unverified version of Among Us. Things may not work properly.");
-            Idle.Add(delegate {
-                _consoleParentFrame.Label = "Console - Unverified Version; Things May Not Work Properly";
-                _consoleParentFrame.TooltipText =
-                    "We have detected an unverified version of Among Us. Please support the official release.";
-                return false;
-            });
         }
         
 
