@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Text;
 using Gdk;
 using GLib;
 using Gtk;
@@ -135,6 +136,7 @@ namespace AmongUsCapture
             var abouticon = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
             string version = String.Empty;
             string master = String.Empty;
+            string license = String.Empty;
             List<String> contributorlist = new List<string>();
             
             using(Stream stream = Assembly.GetExecutingAssembly()
@@ -172,10 +174,28 @@ namespace AmongUsCapture
                 }
             }
 
+            using (Stream stream = Assembly.GetExecutingAssembly()
+                .GetManifestResourceStream("amonguscapture_gtk.license"))
+            {
+                using(StreamReader sr = new StreamReader(stream))
+                {
+                    StringBuilder sb = new StringBuilder();
+
+                    string line;
+                    while((line = sr.ReadLine()) != null)
+                    {
+                        sb.AppendLine(line);
+                    }
+
+                    license = sb.ToString();
+                }
+            }
+
             AboutDialog about = new AboutDialog()
             {
                 Name = "_amonguscaptureGtkAboutDialog",
                 ProgramName = "Among Us Capture GTK",
+                LicenseType = License.MitX11,
                 Icon = abouticon,
                 Version = version,
                 Authors = contributorlist.ToArray(),
@@ -184,7 +204,7 @@ namespace AmongUsCapture
                 Website = "https://github.com/TauAkiou/amonguscapture-gtk",
                 Logo = abouticon
             };
-            
+
             about.Present();
             about.Run();
             
