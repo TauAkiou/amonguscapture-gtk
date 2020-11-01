@@ -60,24 +60,24 @@ jobs:
     windows-x86-build:
        runs-on: windows-latest
         
-        steps:
+      steps:
         - uses: actions/checkout@v2
 
-          - name: Setup .NET Core
-            uses: actions/setup-dotnet@v1
-            with:
-              dotnet-version: 3.1
+        - name: Setup .NET Core
+          uses: actions/setup-dotnet@v1
+          with:
+            dotnet-version: 3.1
             
-          - name: Install dependencies
-            run: dotnet restore "AmongUsCapture\AmongUsCapture.csproj"
-          - name: Publish
-            run: |
-              dotnet publish "AmongUsCapture\\AmongUsCapture.csproj" -p:PublishProfile=WindowsProfilex64 -p:AssemblyVersion=0.0.1
-          - name: Relocate
-            run: |
-              mv AmongUsCapture\\bin\\publish\\win-x64\\AmongUsCapture.exe AmongUsCapture-gtk-windows-x64.exe
-          - name: AmongUsCapture-beta
-            uses: actions/upload-artifact@v2
-            with:
-              name: AmongUsCapture-beta-x64.exe
-              path: AmongUsCapture-gtk-windows-x64.exe
+        - name: Install dependencies
+          run: dotnet restore "AmongUsCapture\AmongUsCapture.csproj"
+        - name: Publish
+          run: |
+           dotnet publish "AmongUsCapture\\AmongUsCapture.csproj" -p:PublishProfile=WindowsProfilex64 -p:AssemblyVersion=0.0.1
+        - name: Relocate
+          run: |
+            mv AmongUsCapture\\bin\\publish\\win-x64\\AmongUsCapture.exe AmongUsCapture-gtk-windows-x64.exe
+        - name: AmongUsCapture-beta
+          uses: actions/upload-artifact@v2
+          with:
+            name: AmongUsCapture-beta-x64.exe
+            path: AmongUsCapture-gtk-windows-x64.exe
