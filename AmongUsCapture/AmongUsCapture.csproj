@@ -23,7 +23,7 @@
     <EmbeddedResource Include="icon.ico" />
     <EmbeddedResource Include="master.txt" />
     <EmbeddedResource Include="contributors.txt" />
-    <EmbeddedResource Include="version.txt" />
+    <EmbeddedResource Include="version.txt" Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))" />
   </ItemGroup>
 
   <ItemGroup>
