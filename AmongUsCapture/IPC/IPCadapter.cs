@@ -12,10 +12,6 @@ using System.Threading.Tasks;
 using System.Web;
 using AmongUsCapture.DBus;
 using AmongUsCapture.Windows;
-using Gtk;
-using Microsoft.Win32;
-using Newtonsoft.Json;
-using SharedMemory;
 
 namespace AmongUsCapture
 {
@@ -63,6 +59,10 @@ namespace AmongUsCapture
         public abstract void SendToken(string host, string connectCode);
         public abstract Task RegisterMinion();
         public abstract void startWithToken(string uri);
+
+        public virtual void InstallHandler()
+        {
+        }
 
         // This method is for implementations that might be cancelable - such as DBUS.
         public virtual async Task<bool> Cancel()

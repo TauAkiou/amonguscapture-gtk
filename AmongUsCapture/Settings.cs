@@ -31,6 +31,8 @@ namespace AmongUsCapture
         [Option(Alias = "DebugConsole", DefaultValue = false)]
         bool debugConsole { get; set; }
         
+        [Option(Alias = "SkipHandlerInstall", DefaultValue = false)]
+        bool skipHandlerInstall { get; set; }
     }
 
     public interface IGameOffsets

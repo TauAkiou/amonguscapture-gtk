@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Reflection.Metadata;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using System.Security;
 using Gdk;
 using GLib;
 using Gtk;
@@ -77,6 +78,16 @@ namespace AmongUsCapture
             // Get the user's default GTK TextView foreground color.
             NormalTextColor = GetRgbColorFromFloat(_consoleTextView.StyleContext.GetColor(Gtk.StateFlags.Normal));
 
+            var xdg_path = System.IO.Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "applications");
+            var xdg_file = System.IO.Path.Join(xdg_path, "aucapture-opener.desktop");
+            
+            if (!File.Exists(xdg_file) && !Settings.PersistentSettings.skipHandlerInstall);
+            {
+                // Activate the button if we aren't skipping the handler install.
+                _primaryWindowInstallLinkHandler.Activate();
+            }
+
         }
 
         
@@ -95,7 +106,60 @@ namespace AmongUsCapture
                 return false;
             });
         }
-        
+
+
+        private void _primaryWindowInstallLinkWindow_Dialog(object o, EventArgs e) {
+
+        Gtk.Application.Invoke((sender, args) =>
+            {
+                var xdg_path = System.IO.Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                    "applications");
+                var xdg_file = System.IO.Path.Join(xdg_path, "aucapture-opener.desktop");
+                string info = String.Empty;
+                
+                if(!File.Exists(xdg_file) && !Settings.PersistentSettings.skipHandlerInstall)
+                {
+                    info +=
+                        "This is your first time running the program, or you do not have the association for aucapture links installed.\n\n";
+                }
+
+                info +=
+                    "This will allow you to use the automatic, link-based system for connecting to the AutoMuteUs discord bot.\n\n" +
+                    "The following operations will be performed:\n\n" +
+                    $"- The following .desktop file will be installed: {xdg_file}\n\n" +
+                    "- The following command will be run to link the 'aucapture:' URI to the program: \'default aucapture-opener.desktop x-scheme-handler/aucapture\'" +
+                    "\n\nNote that this will also replace the old version of the .desktop file if you already have it installed.";
+
+                var InstallLinkDialogBox = new MessageDialog(this,
+                    DialogFlags.Modal,
+                    MessageType.Question,
+                    ButtonsType.None,
+                    false,
+                    info);
+                
+                InstallLinkDialogBox.Title = "Install aucapture Link Association";
+                InstallLinkDialogBox.AddButton("Cancel", ResponseType.Reject);
+                InstallLinkDialogBox.AddButton("Install", ResponseType.Accept);
+                
+                InstallLinkDialogBox.Response += delegate(object o1, ResponseArgs responseArgs)
+                {
+                    if (responseArgs.ResponseId == ResponseType.Reject)
+                    {
+                        // Make sure we have the setting to ignore the dialog box set.
+                        Settings.PersistentSettings.skipHandlerInstall = true;
+                    }
+
+                    if (responseArgs.ResponseId == ResponseType.Accept)
+                    {
+                        IPCadapter.getInstance().InstallHandler();
+                    }
+                };
+                
+                InstallLinkDialogBox.ShowAll();
+                InstallLinkDialogBox.Run();
+                InstallLinkDialogBox.Dispose();
+            });
+        }
 
         private void _primaryWindowMenuQuitItem_Activated(object o, EventArgs e)
         {

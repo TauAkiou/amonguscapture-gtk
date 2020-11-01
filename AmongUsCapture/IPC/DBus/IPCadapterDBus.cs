@@ -1,21 +1,12 @@
 using System;
 using System.Diagnostics;
 using System.IO;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Security.Policy;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Castle.Components.DictionaryAdapter;
-using Gtk;
 using Mono.Unix;
-using SharedMemory;
 using Tmds.DBus;
-using Tmds.DBus.Transports;
 using Color = System.Drawing.Color;
 using Task = System.Threading.Tasks.Task;
-using Thread = System.Threading.Thread;
 
 
 namespace AmongUsCapture.DBus
@@ -63,8 +54,6 @@ namespace AmongUsCapture.DBus
                         try
                         {
                             var capproc = Process.GetProcessById(pidint);
-                            var assmbname = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name;
-                            var runnername = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
                             var iscapture = false;
                             
                             foreach (ProcessModule mod in capproc.Modules)
@@ -113,10 +102,15 @@ namespace AmongUsCapture.DBus
                 result = URIStartResult.PARSE;
             }
 
-            // Register the xdg-mime handler for discord links.
+            // We will be handling the DBus installation.
             RegisterProtocol();
 
             return result;
+        }
+
+        public override void InstallHandler()
+        {
+            RegisterProtocol();
         }
 
         private static void RegisterProtocol()
