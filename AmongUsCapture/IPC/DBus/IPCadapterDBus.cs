@@ -101,10 +101,7 @@ namespace AmongUsCapture.DBus
             {
                 result = URIStartResult.PARSE;
             }
-
-            // We will be handling the DBus installation.
-            RegisterProtocol();
-
+            
             return result;
         }
 
@@ -131,7 +128,7 @@ namespace AmongUsCapture.DBus
                 }
                 else
                 {
-                    executingassmb = System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName;
+                    executingassmb = Process.GetCurrentProcess().MainModule.FileName;
                     Console.WriteLine(executingassmb);
                 }
 
