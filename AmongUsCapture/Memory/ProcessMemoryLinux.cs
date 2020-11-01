@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using Castle.DynamicProxy;
 
 
 namespace AmongUsCapture
@@ -65,6 +66,8 @@ namespace AmongUsCapture
             
             // Read /proc/<pid>/maps for library mapping information.
             // Reading from /proc/<pid>/maps is negligible, since this file is a kernel pseudofile.
+            // Also, it's more reliable then using C#'s native Process object.
+            
             if (!File.Exists($"/proc/{process.Id}/maps"))
             {
                 // We don't have the maps file yet, or we ended up in a state where it doesn't exist.
@@ -215,7 +218,21 @@ namespace AmongUsCapture
                 Marshal.StructureToPtr(local, local_ptr, true);
                 Marshal.StructureToPtr(remote, remote_ptr, true);
 
-                LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
+                var readstatus = LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
+                if (readstatus < 0)
+                {
+                    var errorno = Marshal.GetLastWin32Error();
+                    
+                    Marshal.FreeHGlobal(local_ptr);
+                    Marshal.FreeHGlobal(remote_ptr);
+                    Marshal.FreeHGlobal(buffer_marshal);
+                    
+                    if (errorno == 1)
+                    {
+                        throw new CaptureMemoryException(CaptureErrorCode.InsufficientPermissions);
+                    }
+                    throw new CaptureMemoryException(CaptureErrorCode.Unknown);
+                }
 
                 Marshal.Copy(local.iov_base, buffer, 0, buffer.Length);
                 
@@ -267,7 +284,20 @@ namespace AmongUsCapture
             Marshal.StructureToPtr(local, local_ptr, true);
             Marshal.StructureToPtr(remote, remote_ptr, true);
 
-            LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
+            var readstatus = LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
+            if (readstatus < 0)
+            {
+                Marshal.FreeHGlobal(local_ptr);
+                Marshal.FreeHGlobal(remote_ptr);
+                Marshal.FreeHGlobal(buffer_marshal);
+
+                var errorno = Marshal.GetLastWin32Error();
+                if (errorno == 1)
+                {
+                    throw new CaptureMemoryException(CaptureErrorCode.InsufficientPermissions);
+                }
+                throw new CaptureMemoryException(CaptureErrorCode.Unknown);
+            }
 
             Marshal.Copy(local.iov_base, buffer, 0, numBytes);
 

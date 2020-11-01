@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Reflection.Metadata;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using System.Text;
 using Gdk;
 using GLib;
 using Gtk;
@@ -59,8 +63,8 @@ namespace AmongUsCapture
             GameMemReader.getInstance().PlayerChanged += UserForm_PlayerChanged;
             GameMemReader.getInstance().ChatMessageAdded += OnChatMessageAdded;
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
-            GameMemReader.getInstance().GameUnverified += _eventGameIsPirated;
-
+            GameMemReader.getInstance().GameVersionUnverified += _eventGameIsUnverified;
+            
             // Load URL
             _urlHostEntryField.Text = Settings.PersistentSettings.host;
 
@@ -85,21 +89,60 @@ namespace AmongUsCapture
 
         }
 
-        
-        private void _eventGameIsPirated(object o, EventArgs e)
+        private void _eventGameIsUnverified(object o, ValidatorEventArgs e)
         {
-            GameMemReader.getInstance().cracked = false;
-            // Messageboxes appear to be completely fucked in GTKSharp.
-            // Only real option here is to write to console.
-            
+            Gtk.Application.Invoke((obj, ev) =>
+            {
+                var badversionBox = new MessageDialog(this,
+                    DialogFlags.Modal,
+                    MessageType.Warning,
+                    ButtonsType.None,
+                    false,
+                    "We have detected an unverified version of Among Us. The capture may not work properly.",
+                new object[] { });
+
+                if (e.Validity.HasFlag(AmongUsValidity.GAME_VERIFICATION_FAIL))
+                {
+                    badversionBox.Text += "\n\nThis version of Among Us appears to be an out-of-date or Beta version of the game.";
+                }
+                
+                var marea = badversionBox.MessageArea as Box;
+
+                if (e.Validity.HasFlag(AmongUsValidity.STEAM_VERIFICAITON_FAIL))
+                {
+                    badversionBox.Text +=
+                        "\n\nThis version appears to be a cracked or pirated version of the game. Please consider buying a copy of the game at the link below.";
+                    marea.Add(new LinkButton("https://store.steampowered.com/app/945360/Among_Us/", "Open Steam Store"));
+                }
+
+                badversionBox.Text += "\n\nWe cannot provide support for this configuration should you choose to continue.";
+                
+                badversionBox.AddButton("Quit", ResponseType.Reject);
+                badversionBox.AddButton("I Understand", ResponseType.Accept);
+                
+                badversionBox.Response += delegate(object o1, ResponseArgs args)
+                {
+                    if (args.ResponseId == ResponseType.Reject)
+                    {
+                        Close();
+                    }
+
+                    if (args.ResponseId == ResponseType.Accept)
+                    {
+                        GameMemReader.getInstance().cracked = false;
+                        GameMemReader.getInstance().invalidversion = false;
+                        GameMemReader.getInstance().paused = false;
+                    }
+                };
+                
+                badversionBox.ShowAll();
+                badversionBox.Run();
+                badversionBox.Dispose();
+            });
+
+
             Settings.conInterface.WriteModuleTextColored("Notification", Color.Red,
                 $"We have detected an unverified version of Among Us. Things may not work properly.");
-            Idle.Add(delegate {
-                _consoleParentFrame.Label = "Console - Unverified Version; Things May Not Work Properly";
-                _consoleParentFrame.TooltipText =
-                    "We have detected an unverified version of Among Us. Please support the official release.";
-                return false;
-            });
         }
 
 
@@ -166,6 +209,7 @@ namespace AmongUsCapture
             var abouticon = new Pixbuf(Assembly.GetExecutingAssembly().GetManifestResourceStream("amonguscapture_gtk.icon.ico"));
             string version = String.Empty;
             string master = String.Empty;
+            string license = String.Empty;
             List<String> contributorlist = new List<string>();
             
             using(Stream stream = Assembly.GetExecutingAssembly()
@@ -207,6 +251,7 @@ namespace AmongUsCapture
             {
                 Name = "_amonguscaptureGtkAboutDialog",
                 ProgramName = "Among Us Capture GTK",
+                LicenseType = License.MitX11,
                 Icon = abouticon,
                 Version = version,
                 Authors = contributorlist.ToArray(),
@@ -215,7 +260,7 @@ namespace AmongUsCapture
                 Website = "https://github.com/TauAkiou/amonguscapture-gtk",
                 Logo = abouticon
             };
-            
+
             about.Present();
             about.Run();
             
@@ -276,40 +321,20 @@ namespace AmongUsCapture
         private void OnChatMessageAdded(object sender, ChatMessageEventArgs e)
         {
             Settings.conInterface.WriteModuleTextColored("CHAT", Color.DarkKhaki,
-                $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Sender}{NormalTextColor.ToTextColor()}: {e.Message}");
-            //WriteLineToConsole($"[CHAT] {e.Sender}: {e.Message}");
+                $"{PlayerColorToColorOBJ(e.Color).ToTextColorPango(e.Sender)}{e.Message}");
         }
-        /*
-        private void ConnectCodeBox_Enter(object sender, EventArgs e)
-        {
-            BeginInvoke((MethodInvoker) delegate { ConnectCodeBox.Select(0, 0); });
-        }
-
-        private void ConnectCodeBox_Click(object sender, EventArgs e)
-        {
-            if (ConnectCodeBox.Enabled)
-                BeginInvoke((MethodInvoker) delegate { ConnectCodeBox.Select(0, 0); });
-        }
-        */
 
         private void UserForm_PlayerChanged(object sender, PlayerChangedEventArgs e)
         {
             if (e.Action == PlayerAction.Died)
                 deadMessageQueue.Enqueue(
-                    $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Name}{NormalTextColor.ToTextColor()}: {e.Action}");
+                    $"{PlayerColorToColorOBJ(e.Color).ToTextColorPango(e.Name)}: {e.Action}");
             else
                 Settings.conInterface.WriteModuleTextColored("PlayerChange", Color.DarkKhaki,
-                    $"{PlayerColorToColorOBJ(e.Color).ToTextColor()}{e.Name}{NormalTextColor.ToTextColor()}: {e.Action}");
+                    $"{PlayerColorToColorOBJ(e.Color).ToTextColorPango(e.Name)}: {e.Action}");
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, e.Name + ": " + e.Action);
         }
-
-        /*
-        private void UserForm_Load(object sender, EventArgs e)
-        {
-            URLTextBox.Text = Settings.PersistentSettings.host;
-        }
-        */
-
+        
         private void GameStateChangedHandler(object sender, GameStateChangedEventArgs e)
         {
             while (deadMessageQueue.Count > 0) //Lets print out the state changes now that gamestate has changed.
@@ -323,7 +348,7 @@ namespace AmongUsCapture
                 _currentStateLabel.Text = e.NewState.ToString();
                 return false;
             });
-            Settings.conInterface.WriteModuleTextColored("GameMemReader", Color.Lime, $"State changed to {Color.Cyan.ToTextColor()}{e.NewState}");
+            Settings.conInterface.WriteModuleTextColored("GameMemReader", Color.Lime, $"State changed to {Color.Cyan.ToTextColorPango(e.NewState.ToString())}");
             //Program.conInterface.WriteModuleTextColored("GameMemReader", Color.Green, "State changed to " + e.NewState);
         }
 
@@ -343,33 +368,34 @@ namespace AmongUsCapture
             doConnect(url);
         }
         
-        /*
-        public void setColor(MetroColorStyle color)
-        {
-            BeginInvoke((MethodInvoker) delegate
-            {
-                Style = color;
-                metroStyleExtender1.Style = color;
-                metroStyleManager1.Style = color;
-                metroStyleManager1.Style = color;
-            });
-        }
-        */
-        
         private void doConnect(string url)
         {
             try
             {
-                clientSocket.OnTokenHandler(null, new StartToken() { Host = url, ConnectCode = _connectCodeEntryField.Text });
+                clientSocket.OnTokenHandler(null,
+                    new StartToken() {Host = url, ConnectCode = _connectCodeEntryField.Text});
             }
             catch (Exception e)
             {
                 // TODO: Add GTK code for error box here
-                //MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+                Gtk.Application.Invoke(delegate(object? sender, EventArgs args)
+                {
+                    var errorbox = new MessageDialog(this,
+                        DialogFlags.UseHeaderBar,
+                        MessageType.Error,
+                        ButtonsType.Close,
+                        e.Message);
+
+                    errorbox.ShowAll();
+                    errorbox.Run();
+                    errorbox.Dispose();
+                });
+            }
+            finally
+            {
                 _connectCodeEntryField.Sensitive = true;
                 _connectCodeSubmitButton.Sensitive = true;
                 _urlHostEntryField.Sensitive = true;
-                return;
             }
         }
 
@@ -379,28 +405,7 @@ namespace AmongUsCapture
             ConnectButton.Enabled = (ConnectCodeBox.Enabled && ConnectCodeBox.Text.Length == 8 && ConnectCodeBox.MaskCompleted);
         }
         */
-
-        private void ConsoleTextBox_TextChanged(object sender, EventArgs e)
-        {
-            //if (AutoScrollMenuItem.Checked && canAutoScroll)
-            //{
-            //    ConsoleTextBox.SelectionStart = ConsoleTextBox.Text.Length;
-            //    ConsoleTextBox.ScrollToCaret();
-            //}
-        }
-
-        /*
-        private void DoAutoScroll()
-        {
-            if (AutoScrollMenuItem.Checked)
-                ConsoleTextBox.BeginInvoke((MethodInvoker) delegate
-                {
-                    ConsoleTextBox.SelectionStart = ConsoleTextBox.Text.Length;
-                    ConsoleTextBox.ScrollToCaret();
-                });
-        }
-        */
-
+        
         private void _consoleTextView_BufferChanged(object sender, EventArgs e)
         { 
             if (_autoscroll)

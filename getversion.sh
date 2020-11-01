@@ -10,13 +10,14 @@ workflow() {
 }
 
 normal() {
-	if [[ ! -z "$GITHUB_SHA" ]]; then
+	if [[ -n "$GITHUB_SHA" ]]; then
 		echo "Already in the github build environment."
 		return 0
 	fi
 
 	git_line=$(git describe --tag)
-	echo "$git_line" > AmongUsCapture/version.txt
+	
+	echo "$git_line" > "version.txt"
 }
 
 if [[ $1 == "workflow" ]]; then

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
     <RootNamespace>amonguscapture_gtk</RootNamespace>
   </PropertyGroup>
@@ -23,9 +23,9 @@
 
   <ItemGroup>
     <EmbeddedResource Include="icon.ico" />
-    <EmbeddedResource Include="version.txt" />
     <EmbeddedResource Include="master.txt" />
     <EmbeddedResource Include="contributors.txt" />
+    <EmbeddedResource Include="version.txt" Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,7 +41,12 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   
-  <Target Name="GetGitHash" BeforeTargets="BeforeBuild" Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux))) ">
+  <Target Name="test" BeforeTargets="BeforeBuild">
+    <Message Text="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))" />
+  </Target>
+  
+  <Target Name="GetGitHash" BeforeTargets="BeforeBuild" Condition="$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::Linux)))">
+      <Message Text="Detected Linux environment" />
       <Exec Command="bash ../getversion.sh normal" />
   </Target>
 

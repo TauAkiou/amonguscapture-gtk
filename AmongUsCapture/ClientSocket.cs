@@ -57,7 +57,7 @@ namespace AmongUsCapture
                 //Settings.form.setConnectionStatus(false);
                 //Settings.conInterface.WriteTextFormatted($"[§bClientSocket§f] Lost connection!");
                 Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
-                    $"{Color.Red.ToTextColor()}Connection lost!");
+                    $"{Color.Red.ToTextColorPango("Connection lost!")}");
 
                 // Alert any listeners that the disconnection has occured.
                 OnDisconnected?.Invoke(this, EventArgs.Empty);
@@ -67,7 +67,7 @@ namespace AmongUsCapture
         public async Task OnTokenHandler(object sender, StartToken token)
         {
             Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
-                $"Attempting to connect to host {Color.LimeGreen.ToTextColor()}{token.Host}{Color.White.ToTextColor()} with connect code {Color.Red.ToTextColor()}{token.ConnectCode}{Color.White.ToTextColor()}");
+                $"Attempting to connect to host {Color.LimeGreen.ToTextColorPango(token.Host)} with connect code {Color.Red.ToTextColorPango(token.ConnectCode)}");
             if (socket.Connected)
                 // Disconnect from the existing host...
                 await socket.DisconnectAsync().ContinueWith(async (t) =>
@@ -84,7 +84,7 @@ namespace AmongUsCapture
         {
             var message = e != null ? e.Message : "A generic connection error occured.";
             Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
-                $"{Color.Red.ToTextColor()}{message}");
+                $"{Color.Red.ToTextColorPango(message)}");
         }
 
         private async Task Connect(string url, string connectCode)
@@ -133,12 +133,12 @@ namespace AmongUsCapture
             if (!socket.Connected) return;
             socket.EmitAsync("lobby", JsonSerializer.Serialize(e));
             Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
-                $"Room code ({Color.Yellow.ToTextColor()}{e.LobbyCode}) sent to server.");
+                $"Room code ({Color.Yellow.ToTextColorPango(e.LobbyCode)}) sent to server.");
         }
+    }
 
-        public class ConnectedEventArgs : EventArgs
+    public class ConnectedEventArgs : EventArgs
         {
             public string Uri { get; set; }
         }
     }
-}

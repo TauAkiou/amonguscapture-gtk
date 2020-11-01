@@ -10,8 +10,26 @@ AmongusCapture-gtk is currently supported under:
 * Linux
 
 Features that are currently only supported under Windows:
-* Client Verification
 * Discord IPC Links
+
+## Prebuilt Releases
+Prebuilt releases are available here: [prebuilt releases](https://github.com/TauAkiou/amonguscapture-gtk/releases)
+
+## NOTE FOR LINUX USERS:
+
+Some linux distributions will prevent AmongUsCapture from linking with the Among Us game process. This is due to a [ptrace scope security feature](https://askubuntu.com/questions/146160/what-is-the-ptrace-scope-workaround-for-wine-programs-and-are-there-any-risks).
+
+In order for the capture to work, you must use `setcap` to add ptrace capabilities to the Capture process. Note that doing so will require root!
+
+```
+sudo setcap cap_sys_ptrace=eip <capture executable>
+```
+
+Also note that moving or changing the capture in any way will strip these permissions from the executable and you will have to setcap the capture again.
+
+Distributions known to be affected by this:
+* Ubuntu
+* Arch
 
 ## Requirements:
 
@@ -29,13 +47,11 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
 
 ## Building
 
-
-
 ### Windows
 
 
 * .NET Core SDK: https://dotnet.microsoft.com/download
-* Visual Studio (Recommended)
+* Visual Studio
 ```
     - Create a new file: 'version.txt' in the AmongUsCapture/ directory.
     - Loading the 'AmongUsCapture.sln' file and building should be sufficient enough.
@@ -49,6 +65,8 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
   - 'dotnet build --configuration Release' for release builds
   - 'dotnet build --configuration Debug' for debug builds
 ```
+
+
     
 ### Linux
 * .NET Core 3.1 SDK: https://docs.microsoft.com/en-us/dotnet/core/install/linux
@@ -56,31 +74,23 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
 
 #### Instructions: 
 
-I'm currently having some trouble with the makefile, so here are some manual instructions:
 ```
 - git clone https://github.com/TauAkiou/amonguscapture-gtk
 
-- git checkout linux-mem-new
-
 - cd amonguscapture-gtk
 
-- git rev-parse HEAD > AmongUsCapture/version.txt
-
 - dotnet build -c <release/debug>
-
-Your code will be in amonguscapture-gtk/bin/<Release/Debug>/netcoreapp3.1>
-
 ```
 
-Makefile instructions for when I get it working again:
+Your code will be in amonguscapture-gtk/bin/<Release/Debug>/netcoreapp3.1> as "amonguscapture.dll".
 
-    - git clone https://github.com/TauAkiou/amonguscapture-gtk/tree/linux-mem-new
-    
-    For release builds:
-    - cd amonguscapture-gtk 
-    - 'make' or 'make release'
-    
-    For debug builds:
-    - cd amonguscapture-gtk
-    - 'make debug'
+If you want a standalone executable: 
+
+```
+- cd amonguscapture-gtk
+
+- dotnet publish "AmongUsCapture\AmongUsCapture.csproj" -p:PublishProfile=LinuxProfilex64 -p:AssemblyVersion=0.0.1
+```
+
+
 
