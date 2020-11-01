@@ -57,8 +57,8 @@ jobs:
           name: AmongUsCapture-beta-x86.exe
           path: AmongUsCapture-gtk-windows-x86.exe
 
-    windows-x86-build:
-       runs-on: windows-latest
+    windows-x64-build:
+      runs-on: windows-latest
         
       steps:
         - uses: actions/checkout@v2
