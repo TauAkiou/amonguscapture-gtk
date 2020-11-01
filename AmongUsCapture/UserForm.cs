@@ -66,7 +66,7 @@ namespace AmongUsCapture
             GameMemReader.getInstance().PlayerChanged += UserForm_PlayerChanged;
             GameMemReader.getInstance().ChatMessageAdded += OnChatMessageAdded;
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
-            GameMemReader.getInstance().GameUnverified += _eventGameIsPirated;
+            GameMemReader.getInstance().GameVersionUnverified += _eventGameIsUnverified;
             
             // Load URL
             _urlHostEntryField.Text = Settings.PersistentSettings.host;
@@ -80,29 +80,38 @@ namespace AmongUsCapture
 
         }
 
-        private void _eventGameIsPirated(object o, EventArgs e)
+        private void _eventGameIsUnverified(object o, ValidatorEventArgs e)
         {
-            GameMemReader.getInstance().cracked = false;
-
-            Gtk.Application.Invoke((obj, e) =>
+            Gtk.Application.Invoke((obj, ev) =>
             {
-                var pirateBox = new MessageDialog(this,
+                var badversionBox = new MessageDialog(this,
                     DialogFlags.Modal,
                     MessageType.Warning,
                     ButtonsType.None,
                     false,
-                    "We have detected an unverified version of Among Us. The capture way not work properly." +
-                    "\n\nWe cannot provide support for pirated/cracked versions of the game. Please consider buying the game from Steam.",
-                    new object[] { });
+                    "We have detected an unverified version of Among Us. The capture may not work properly.",
+                new object[] { });
 
-                var marea = pirateBox.MessageArea as Box;
-
-                marea.Add(new LinkButton("https://store.steampowered.com/app/945360/Among_Us/", "Open Steam Store"));
-
-                pirateBox.AddButton("Quit", ResponseType.Reject);
-                pirateBox.AddButton("I Understand", ResponseType.Accept);
+                if (e.Validity.HasFlag(AmongUsValidity.GAME_VERIFICATION_FAIL))
+                {
+                    badversionBox.Text += "\n\nThis version of Among Us appears to be an out-of-date or Beta version of the game.";
+                }
                 
-                pirateBox.Response += delegate(object o1, ResponseArgs args)
+                var marea = badversionBox.MessageArea as Box;
+
+                if (e.Validity.HasFlag(AmongUsValidity.STEAM_VERIFICAITON_FAIL))
+                {
+                    badversionBox.Text +=
+                        "\n\nThis version appears to be a cracked or pirated version of the game. Please consider buying a copy of the game at the link below.";
+                    marea.Add(new LinkButton("https://store.steampowered.com/app/945360/Among_Us/", "Open Steam Store"));
+                }
+
+                badversionBox.Text += "\n\nWe cannot provide support for this configuration should you choose to continue.";
+                
+                badversionBox.AddButton("Quit", ResponseType.Reject);
+                badversionBox.AddButton("I Understand", ResponseType.Accept);
+                
+                badversionBox.Response += delegate(object o1, ResponseArgs args)
                 {
                     if (args.ResponseId == ResponseType.Reject)
                     {
@@ -112,12 +121,14 @@ namespace AmongUsCapture
                     if (args.ResponseId == ResponseType.Accept)
                     {
                         GameMemReader.getInstance().cracked = false;
+                        GameMemReader.getInstance().invalidversion = false;
+                        GameMemReader.getInstance().paused = false;
                     }
                 };
                 
-                pirateBox.ShowAll();
-                pirateBox.Run();
-                pirateBox.Dispose();
+                badversionBox.ShowAll();
+                badversionBox.Run();
+                badversionBox.Dispose();
             });
 
 
@@ -171,23 +182,6 @@ namespace AmongUsCapture
                     {
                         contributorlist.Add(contrib);
                     }
-                }
-            }
-
-            using (Stream stream = Assembly.GetExecutingAssembly()
-                .GetManifestResourceStream("amonguscapture_gtk.license"))
-            {
-                using(StreamReader sr = new StreamReader(stream))
-                {
-                    StringBuilder sb = new StringBuilder();
-
-                    string line;
-                    while((line = sr.ReadLine()) != null)
-                    {
-                        sb.AppendLine(line);
-                    }
-
-                    license = sb.ToString();
                 }
             }
 
@@ -316,16 +310,30 @@ namespace AmongUsCapture
         {
             try
             {
-                clientSocket.OnTokenHandler(null, new StartToken() { Host = url, ConnectCode = _connectCodeEntryField.Text });
+                clientSocket.OnTokenHandler(null,
+                    new StartToken() {Host = url, ConnectCode = _connectCodeEntryField.Text});
             }
             catch (Exception e)
             {
                 // TODO: Add GTK code for error box here
-                //MessageBox.Show(e.Message, "Error", MessageBoxButtons.OK);
+                Gtk.Application.Invoke(delegate(object? sender, EventArgs args)
+                {
+                    var errorbox = new MessageDialog(this,
+                        DialogFlags.UseHeaderBar,
+                        MessageType.Error,
+                        ButtonsType.Close,
+                        e.Message);
+
+                    errorbox.ShowAll();
+                    errorbox.Run();
+                    errorbox.Dispose();
+                });
+            }
+            finally
+            {
                 _connectCodeEntryField.Sensitive = true;
                 _connectCodeSubmitButton.Sensitive = true;
                 _urlHostEntryField.Sensitive = true;
-                return;
             }
         }
 

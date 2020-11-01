@@ -1,6 +1,6 @@
 TauAkiou (GTK Port)
 denverquane (Original Author)
-CarbonNauron (Major Contributor)
+CarbonNeuron (Major Contributor)
 Stenlan (Major Contributor)
 nzbr (Major Contributor)
 Other Contributors to the Main Project

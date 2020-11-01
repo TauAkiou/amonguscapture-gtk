@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 
 namespace AmongUsCapture
 {
@@ -23,11 +24,12 @@ namespace AmongUsCapture
                 }
                 else
                 {
-                    throw new NotImplementedException();
+                    throw new PlatformNotSupportedException();
                 }
             }
             return instance;
         }
+        
         protected bool is64Bit;
         public Process process;
         public List<Module> modules;
@@ -59,6 +61,37 @@ namespace AmongUsCapture
             public IntPtr BaseAddress;
             public uint ModuleSize;
             public IntPtr EntryPoint;
+        }
+
+        public class CaptureMemoryException : Exception
+        {
+            public CaptureErrorCode ErrorCode { get; }
+
+            public CaptureMemoryException()
+            {
+                ErrorCode = CaptureErrorCode.Unknown;
+            }
+
+            public CaptureMemoryException(string message) : base(message)
+            {
+                ErrorCode = CaptureErrorCode.Unknown;
+            }
+
+            public CaptureMemoryException(CaptureErrorCode ecode)
+            {
+                ErrorCode = ecode;
+            }
+
+            public CaptureMemoryException(string message, CaptureErrorCode ecode) : base(message)
+            {
+                ErrorCode = ecode;
+            }
+        }
+
+        public enum CaptureErrorCode
+        {
+            Unknown = 1,
+            InsufficientPermissions = 2
         }
     }
 }

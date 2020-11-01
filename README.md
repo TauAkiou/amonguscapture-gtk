@@ -16,6 +16,22 @@ Features that are currently only supported under Windows:
 ## Prebuilt Releases
 Prebuilt releases are available here: [prebuilt releases](https://github.com/TauAkiou/amonguscapture-gtk/releases)
 
+## NOTE FOR LINUX USERS:
+
+Some linux distributions will prevent AmongUsCapture from linking with the Among Us game process. This is due to a [ptrace scope security feature](https://askubuntu.com/questions/146160/what-is-the-ptrace-scope-workaround-for-wine-programs-and-are-there-any-risks).
+
+In order for the capture to work, you must use `setcap` to add ptrace capabilities to the Capture process. Note that doing so will require root!
+
+```
+sudo setcap cap_sys_ptrace=eip <capture executable>
+```
+
+Also note that moving or changing the capture in any way will strip these permissions from the executable and you will have to setcap the capture again.
+
+Distributions known to be affected by this:
+* Ubuntu
+* Arch
+
 ## Requirements:
 
 ### Windows:
@@ -74,7 +90,7 @@ If you want a standalone executable:
 ```
 - cd amonguscapture-gtk
 
-- dotnet publish "AmongUsCapture\AmongUsCapture.csproj" -p:PublishProfile=FolderProfile -p:AssemblyVersion=0.0.1
+- dotnet publish "AmongUsCapture\AmongUsCapture.csproj" -p:PublishProfile=LinuxProfilex64 -p:AssemblyVersion=0.0.1
 ```
 
 
