@@ -470,9 +470,7 @@ namespace AmongUsCapture
                             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
                             {
                                 Settings.conInterface.WriteModuleTextColored("GameMemReader", Color.Lime,
-                                    "AmongUsCapture does not have permission to link to the Among Us process. " +
-                                    "This is due to a kernel security setting that disallows programs from reading the memory of other processes. " +
-                                    "Information can be found <a href=\"https://askubuntu.com/questions/146160/what-is-the-ptrace-scope-workaround-for-wine-programs-and-are-there-any-risks\">here</a>, and a solution is available in the readme.");
+                                    "AmongUsCapture does not have permission to link to the Among Us process. This is due to a kernel security setting that disallows programs from reading the memory of other processes. Please check the readme for more information.");
                             }
                             else
                             {

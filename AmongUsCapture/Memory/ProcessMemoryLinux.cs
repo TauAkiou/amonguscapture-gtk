@@ -223,11 +223,12 @@ namespace AmongUsCapture
                 var readstatus = LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
                 if (readstatus < 0)
                 {
+                    var errorno = Marshal.GetLastWin32Error();
+                    
                     Marshal.FreeHGlobal(local_ptr);
                     Marshal.FreeHGlobal(remote_ptr);
                     Marshal.FreeHGlobal(buffer_marshal);
-
-                    var errorno = Marshal.GetLastWin32Error();
+                    
                     if (errorno == 1)
                     {
                         throw new CaptureMemoryException(CaptureErrorCode.InsufficientPermissions);
