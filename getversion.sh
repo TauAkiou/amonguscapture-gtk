@@ -20,8 +20,6 @@ normal() {
 	echo "$git_line" > "version.txt"
 }
 
-pwd
-
 if [[ $1 == "workflow" ]]; then
 	workflow
 elif [[ $1 == "normal" ]]; then
