@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.IO.Pipes;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
@@ -34,13 +35,15 @@ namespace AmongUsCapture
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && Settings.PersistentSettings.debugConsole)
                 AllocConsole(); // needs to be the first call in the program to prevent weird bugs
-
-            var testpango = Color.Green.ToTextColorPango("test");
+          
+            if (!Directory.Exists(Settings.StorageLocation))
+            {
+                // Create Settings directory if it doesn't exist, as we need to stick our pidfile there.
+                Directory.CreateDirectory(Settings.StorageLocation);
+            }
             
             URIStartResult uriRes = URIStartResult.CLOSE;
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-            {
-                uriRes = IPCadapter.getInstance().HandleURIStart(args);
+            uriRes = IPCadapter.getInstance().HandleURIStart(args);
                 switch (uriRes)
                 {
                     case URIStartResult.CLOSE:
@@ -54,26 +57,23 @@ namespace AmongUsCapture
                     default:
                         throw new ArgumentOutOfRangeException();
                 }
-            }
 
-            socket = new ClientSocket();
+                socket = new ClientSocket();
             
             //Create the Form Console interface. 
-            Task.Factory.StartNew(() => socket.Init()).Wait(); // run socket in background. Important to wait for init to have actually finished before continuing
             var thread = new Thread(OpenGUI);
             if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) thread.SetApartmentState(ApartmentState.STA);
             thread.Start();
             while (Settings.conInterface is null) Thread.Sleep(250);
-            //Create the Form Console interface. 
             Task.Factory.StartNew(() => socket.Init())
                 .Wait(); // run socket in background. Important to wait for init to have actually finished before continuing
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) IPCadapter.getInstance().RegisterMinion();
+            Task.Factory.StartNew(() => IPCadapter.getInstance().RegisterMinion()).Wait();
 
             // Add a GLib Idle handler to fix the issue here. 
             Idle.Add(delegate
             {
                 Task.Factory.StartNew(() => GameMemReader.getInstance().RunLoop()); // run loop in background
-                if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) && uriRes == URIStartResult.PARSE)
+                if (uriRes == URIStartResult.PARSE)
                     IPCadapter.getInstance().SendToken(args[0]);
                 return false;
             });
@@ -94,17 +94,16 @@ namespace AmongUsCapture
             
             window.DeleteEvent += (object o, DeleteEventArgs e) =>
             {
+                // Make sure that the IPC adapter has a chance to clean up after itself.
+                IPCadapter.getInstance().Cancel().Wait();
                 Application.Quit();
             };
-
-            // Post a quick message to the console if we are using Linux, notifying the user that IPC links do not work.
-            
-            Settings.conInterface.WriteModuleTextColored("Notification", Color.Red,
-                $"You are running amonguscapture under Linux. Discord capture links are not currently supported. Use the manual details in your DM instead.");
 
             window.ShowAll();
 
             Application.Run();
+            IPCadapter.getInstance().Cancel().Wait();
+            
             Environment.Exit(0);
         }
 
@@ -112,12 +111,11 @@ namespace AmongUsCapture
         {
             return Process.GetCurrentProcess().MainModule.FileName;
         }
-
+        
 
         [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         private static extern bool AllocConsole();
-
         
     }
 }

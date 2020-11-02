@@ -7,7 +7,7 @@ namespace AmongUsCapture
 {
     public static class Settings
     {
-        public static string StorageLocation = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "\\AmongUsCapture");
+        public static string StorageLocation = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AmongUsCapture");
 
         public static ConsoleInterface conInterface;
 
@@ -31,6 +31,8 @@ namespace AmongUsCapture
         [Option(Alias = "DebugConsole", DefaultValue = false)]
         bool debugConsole { get; set; }
         
+        [Option(Alias = "SkipHandlerInstall", DefaultValue = false)]
+        bool skipHandlerInstall { get; set; }
     }
 
     public interface IGameOffsets

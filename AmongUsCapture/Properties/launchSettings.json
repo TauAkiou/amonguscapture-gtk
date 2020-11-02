@@ -2,6 +2,10 @@
   "profiles": {
     "AmongUsCapture": {
       "commandName": "Project"
+    },
+    "AmongUsCaptureIPC": {
+      "commandName": "Project",
+      "commandLineArgs": "aucapture://localhost:8123/E68A0AD9?insecure"
     }
   }
 }

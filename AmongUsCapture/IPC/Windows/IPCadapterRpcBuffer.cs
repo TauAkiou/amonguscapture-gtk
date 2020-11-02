@@ -1,33 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Pipes;
-using System.Linq;
+using System;
 using System.Text;
-using System.Threading;
-using System.Web;
-using Microsoft.Win32;
-using Newtonsoft.Json;
+using System.Threading.Tasks;
 using SharedMemory;
+using Mutex = System.Threading.Mutex;
+using Process = System.Diagnostics.Process;
+#pragma warning disable 4014
 
-namespace AmongUsCapture
+namespace AmongUsCapture.Windows
 {
-    class IPCadapter
+    class IPCadapterRpcBuffer : IPCadapter
     {
-        public const string appName = "AmongUsCapture";
-        private const string UriScheme = "aucapture";
-        private const string FriendlyName = "AmongUs Capture";
-        private Mutex mutex;
-        private static IPCadapter instance = new IPCadapter();
-        public event EventHandler<StartToken> OnToken;
-        public static IPCadapter getInstance()
-        {
-            return instance;
-        }
-
-        public URIStartResult HandleURIStart(string[] args)
+        
+        public override URIStartResult HandleURIStart(string[] args)
         {
             var myProcessId = Process.GetCurrentProcess().Id;
             //Process[] processes = Process.GetProcessesByName("AmongUsCapture");
@@ -60,13 +44,13 @@ namespace AmongUsCapture
             return result;
         }
 
-        public void SendToken(string host, string connectCode)
+        public override void SendToken(string host, string connectCode)
         {
             var st = new StartToken {ConnectCode = connectCode, Host = host};
-            OnToken?.Invoke(this, st);
+            OnTokenEvent(st);
         }
 
-        public bool SendToken(string jsonText)
+        public async override Task<bool> SendToken(string jsonText)
         {
             var rpcGru = new RpcBuffer(appName); //Soup told me not to but its funny
             var RPCresult = rpcGru.RemoteRequest(Encoding.UTF8.GetBytes(jsonText));
@@ -98,56 +82,24 @@ namespace AmongUsCapture
                 }
             }
             #endif
-            #if _LINUX
-                
-            #endif
         }
 
-        public void RegisterMinion()
+        public override Task RegisterMinion()
         {
             var rpcMinion = new RpcBuffer(appName, (msgId, payload) =>
             {
                 var serverResponse = "Carbon has a huge pp also this is debug messages.";
                 var gotData = Encoding.UTF8.GetString(payload, 0, payload.Length);
                 Console.WriteLine($"RPCMinion: Got data: {gotData}");
-                OnToken?.Invoke(this, StartToken.FromString(gotData)); //Invoke method and return.
+                OnTokenEvent(StartToken.FromString(gotData));; //Invoke method and return.
                 return Encoding.UTF8.GetBytes(serverResponse);
             });
+            return Task.CompletedTask;
         }
 
-        public void startWithToken(string uri)
+        public override void startWithToken(string uri)
         {
-            OnToken?.Invoke(this, StartToken.FromString(uri));
+            OnTokenEvent(StartToken.FromString(uri));;
         }
     }
-
-    public enum URIStartResult
-    {
-        CLOSE,
-        PARSE,
-        CONTINUE
-    }
-
-    public class StartToken : EventArgs
-    {
-        public string Host { get; set; }
-        public string ConnectCode { get; set; }
-
-        public static StartToken FromString(string rawToken)
-        {
-            try
-            {
-                Uri uri = new Uri(rawToken);
-                NameValueCollection nvc = HttpUtility.ParseQueryString(uri.Query);
-                bool insecure = (nvc["insecure"] != null && nvc["insecure"] != "false") || uri.Query == "?insecure";
-                return new StartToken() { Host = (insecure ? "http://" : "https://") + uri.Authority, ConnectCode = uri.AbsolutePath.Substring(1) };
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return new StartToken();
-            }
-        }
-    }
-
 }

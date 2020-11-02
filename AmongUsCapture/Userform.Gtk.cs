@@ -14,6 +14,7 @@ namespace AmongUsCapture
         
         // Menu
         private Menu _primaryWindowMenuFile;
+        private MenuItem _primaryWindowInstallLinkHandler;
         private MenuItem _primaryWindowMenuQuitItem;
 
         // Top level windows
@@ -72,9 +73,11 @@ namespace AmongUsCapture
             _primaryWindowMenuBar = new MenuBar();
             
             _primaryMenuItemFile = new MenuItem();
-            
+
             _primaryWindowMenuFile = new Menu();
             _primaryWindowMenuQuitItem = new MenuItem();
+            _primaryWindowInstallLinkHandler = new MenuItem();
+            
             _primaryMenuItemAbout = new MenuItem();
             
             
@@ -139,11 +142,16 @@ namespace AmongUsCapture
             _primaryMenuItemAbout.Activated += _primaryWindowMenuItemAbout_Activated;
 
             _primaryWindowMenuFile.Name = "_primaryWindowMenu";
+            _primaryWindowMenuFile.Append(_primaryWindowInstallLinkHandler);
             _primaryWindowMenuFile.Append(_primaryWindowMenuQuitItem);
 
             _primaryWindowMenuQuitItem.Name = "_primaryWindowMenuQuitItem";
             _primaryWindowMenuQuitItem.Label = "Quit";
             _primaryWindowMenuQuitItem.Activated += _primaryWindowMenuQuitItem_Activated;
+
+            _primaryWindowInstallLinkHandler.Name = "_primaryWindowInstallLinkHandler";
+            _primaryWindowInstallLinkHandler.Label = "Install Link Handler";
+            _primaryWindowInstallLinkHandler.Activated += _primaryWindowInstallLinkWindow_Dialog;
 
             // _primaryWindowPane definition (splitContainer1)
             _primaryWindowPane.Name = "_primaryWindowPane";
