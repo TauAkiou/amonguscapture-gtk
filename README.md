@@ -9,9 +9,6 @@ AmongusCapture-gtk is currently supported under:
 * Windows
 * Linux
 
-Features that are currently only supported under Windows:
-* Discord IPC Links
-
 ## Prebuilt Releases
 Prebuilt releases are available here: [prebuilt releases](https://github.com/TauAkiou/amonguscapture-gtk/releases)
 
