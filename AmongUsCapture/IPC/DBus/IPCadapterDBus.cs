@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using Castle.Core.Internal;
 using Mono.Unix;
 using Tmds.DBus;
 using Color = System.Drawing.Color;
@@ -174,6 +175,52 @@ namespace AmongUsCapture.DBus
 
                 xdgproc.Start();
                 string result = xdgproc.StandardOutput.ReadToEnd();
+                xdgproc.WaitForExit();
+            }
+        }
+
+        public override void RemoveHandler()
+        {
+            var xdg_path = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                "applications");
+            var xdg_file = Path.Join(xdg_path, "aucapture-opener.desktop");
+            
+            if(File.Exists(xdg_file))
+            {
+                File.Delete(xdg_file);
+            }
+            
+            var xdgproc = new Process()
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "/usr/bin/xdg-mime",
+                    Arguments = $"query defualt x-scheme-handler/aucapture",
+                    RedirectStandardOutput = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true,
+                }
+            };
+            
+            xdgproc.Start();
+            string result = xdgproc.StandardOutput.ReadToEnd();
+            xdgproc.WaitForExit();
+
+            if (!result.IsNullOrEmpty())
+            {
+                xdgproc = new Process()
+                {
+                    StartInfo = new ProcessStartInfo
+                    {
+                        FileName = "/usr/bin/xdg-mime",
+                        Arguments = $"uninstall x-scheme-handler/aucapture",
+                        RedirectStandardOutput = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true,
+                    }
+                };
+                
+                xdgproc.Start(); 
                 xdgproc.WaitForExit();
             }
         }

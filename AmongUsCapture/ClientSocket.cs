@@ -44,7 +44,7 @@ namespace AmongUsCapture
                 socket.EmitAsync("connectCode", ConnectCode).ContinueWith((_) =>
                 {
                     Settings.conInterface.WriteModuleTextColored("ClientSocket", Color.Cyan,
-                        $"Connection code ({Color.Red.ToTextColor()}{ConnectCode}) sent to server.");
+                        $"Connection code ({Color.Red.ToTextColorPango(ConnectCode)}) sent to server.");
                     GameMemReader.getInstance().ForceUpdatePlayers();
                     GameMemReader.getInstance().ForceTransmitState();
                     GameMemReader.getInstance().ForceTransmitLobby();

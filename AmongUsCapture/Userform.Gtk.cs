@@ -150,7 +150,7 @@ namespace AmongUsCapture
             _primaryWindowMenuQuitItem.Activated += _primaryWindowMenuQuitItem_Activated;
 
             _primaryWindowInstallLinkHandler.Name = "_primaryWindowInstallLinkHandler";
-            _primaryWindowInstallLinkHandler.Label = "Install Link Handler";
+            _primaryWindowInstallLinkHandler.Label = "One-Click Connection Management";
             _primaryWindowInstallLinkHandler.Activated += _primaryWindowInstallLinkWindow_Dialog;
 
             // _primaryWindowPane definition (splitContainer1)

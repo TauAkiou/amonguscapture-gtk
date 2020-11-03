@@ -64,6 +64,10 @@ namespace AmongUsCapture
         {
         }
 
+        public virtual void RemoveHandler()
+        {
+        }
+
         // This method is for implementations that might be cancelable - such as DBUS.
         public virtual async Task<bool> Cancel()
         {

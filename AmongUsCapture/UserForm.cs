@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Reflection.Metadata;
@@ -13,6 +14,8 @@ using Color = System.Drawing.Color;
 using Menu = Gtk.Menu;
 using Window = Gtk.Window;
 using AmongUsCapture.TextColorLibrary;
+using Castle.Core.Internal;
+using Process = System.Diagnostics.Process;
 
 namespace AmongUsCapture
 {
@@ -155,43 +158,75 @@ namespace AmongUsCapture
                 var xdg_file = System.IO.Path.Join(xdg_path, "aucapture-opener.desktop");
                 string info = String.Empty;
                 
-                if(!File.Exists(xdg_file) && !Settings.PersistentSettings.skipHandlerInstall)
-                {
-                    info +=
-                        "This is your first time running the program, or you do not have the association for aucapture links installed.\n\n";
-                }
-
-                info +=
-                    "This will allow you to use the automatic, link-based system for connecting to the AutoMuteUs discord bot.\n\n" +
-                    "The following operations will be performed:\n\n" +
-                    $"- The following .desktop file will be installed: {xdg_file}\n\n" +
-                    "- The following command will be run to link the 'aucapture:' URI to the program:\n\n \'xdg-mime default aucapture-opener.desktop x-scheme-handler/aucapture\'" +
-                    "\n\nNote that this will also replace the old version of the .desktop file if you already have it installed.";
-
                 var InstallLinkDialogBox = new MessageDialog(this,
                     DialogFlags.Modal,
                     MessageType.Question,
                     ButtonsType.None,
                     false,
-                    info);
+                    String.Empty);
                 
-                InstallLinkDialogBox.Title = "Install aucapture Link Association";
-                InstallLinkDialogBox.AddButton("Cancel", ResponseType.Reject);
-                InstallLinkDialogBox.AddButton("Install", ResponseType.Accept);
-                
-                InstallLinkDialogBox.Response += delegate(object o1, ResponseArgs responseArgs)
+                if(!File.Exists(xdg_file) && !Settings.PersistentSettings.skipHandlerInstall)
                 {
-                    if (responseArgs.ResponseId == ResponseType.Reject)
-                    {
-                        // Make sure we have the setting to ignore the dialog box set.
-                        Settings.PersistentSettings.skipHandlerInstall = true;
-                    }
+                    info +=
+                        "Would you like to enable support for AutoMuteUs one-click connection?" +
+                        "This will allow you to use the links provided by AutoMuteUs to connect the capture to the bot automatically.\n\n" +
+                        "The following operations will be performed:\n\n" +
+                        $"- The following .desktop file will be installed: {xdg_file}\n\n" +
+                        "- The following command will be run to link the 'aucapture:' URI to the program:\n\n \'xdg-mime default aucapture-opener.desktop x-scheme-handler/aucapture\'" +
+                        "\n\nIf you decline, Discord connection links will not be functional." +
+                        "\n\nYou can install or manage One-Click support by using the \"One-Click Connection Management\" link in the File menu.";
 
-                    if (responseArgs.ResponseId == ResponseType.Accept)
+                    InstallLinkDialogBox.Text = info;
+                    InstallLinkDialogBox.Title = "Enable One-Click Connection?";
+                    InstallLinkDialogBox.AddButton("Cancel", ResponseType.Reject);
+                    InstallLinkDialogBox.AddButton("Install", ResponseType.Accept);
+                    
+                    InstallLinkDialogBox.Response += delegate(object o1, ResponseArgs responseArgs)
                     {
-                        IPCadapter.getInstance().InstallHandler();
-                    }
-                };
+                        if (responseArgs.ResponseId == ResponseType.Reject)
+                        {
+                            // Make sure we have the setting to ignore the dialog box set.
+                            Settings.PersistentSettings.skipHandlerInstall = true;
+                        }
+
+                        if (responseArgs.ResponseId == ResponseType.Accept)
+                        {
+                            IPCadapter.getInstance().InstallHandler();
+                        }
+                    };
+                }
+                else
+                {
+                    info += "This menu manages the One-Click Connection link system.\n\n";
+                    
+                    info += "One-Click Connection Status: ";
+                    if (File.Exists(xdg_file)) info += "Enabled\n\n";
+                    else info += "Disabled\n\n";
+
+                    info += $"Runner (.desktop) Installation Path: ";
+                    if (File.Exists(xdg_file)) info += xdg_file;
+                    else info += "Not Found";
+
+                    InstallLinkDialogBox.Text += info;
+                    InstallLinkDialogBox.Title = "Manage One-Click Connection";
+                    InstallLinkDialogBox.AddButton("Cancel", ResponseType.Close);
+                    InstallLinkDialogBox.AddButton("Uninstall", ResponseType.Reject);
+                    InstallLinkDialogBox.AddButton("Reinstall", ResponseType.Accept);
+                    
+                    InstallLinkDialogBox.Response += delegate(object o1, ResponseArgs responseArgs)
+                    {
+                        if (responseArgs.ResponseId == ResponseType.Reject)
+                        {
+                            // Make sure we have the setting to ignore the dialog box set.
+                            IPCadapter.getInstance().RemoveHandler();
+                        }
+
+                        if (responseArgs.ResponseId == ResponseType.Accept)
+                        {
+                            IPCadapter.getInstance().InstallHandler();
+                        }
+                    };
+                }
                 
                 InstallLinkDialogBox.ShowAll();
                 InstallLinkDialogBox.Run();
