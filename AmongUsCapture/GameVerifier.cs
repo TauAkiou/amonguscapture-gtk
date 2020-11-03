@@ -28,7 +28,7 @@ namespace AmongUsCapture
         private const string steamapi32_orig_hash = "07407c1bc2f3114042dbcfe8183b77f73e178be7";
         private const string steamapi64_orig_hash = "e77433094c56433685a68a4436e81b76c3b5e1f5";
         private const string amongusexe_orig_hash = "adb281fa5deee89800ddf68eea941a6b8cf6f38e";
-        private const string gameassembly_orig_hash = "009a5b65dca2bbf48d64b6e9e13a050ef3dbf201";
+        private const string gameassembly_orig_hash = "b0d0cd0103c9854707b158d14538e87a6323102c";
         
         public static bool VerifySteamHash(string executablePath)
         {

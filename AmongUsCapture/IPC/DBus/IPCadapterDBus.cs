@@ -189,40 +189,6 @@ namespace AmongUsCapture.DBus
             {
                 File.Delete(xdg_file);
             }
-            
-            var xdgproc = new Process()
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "/usr/bin/xdg-mime",
-                    Arguments = $"query defualt x-scheme-handler/aucapture",
-                    RedirectStandardOutput = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                }
-            };
-            
-            xdgproc.Start();
-            string result = xdgproc.StandardOutput.ReadToEnd();
-            xdgproc.WaitForExit();
-
-            if (!result.IsNullOrEmpty())
-            {
-                xdgproc = new Process()
-                {
-                    StartInfo = new ProcessStartInfo
-                    {
-                        FileName = "/usr/bin/xdg-mime",
-                        Arguments = $"uninstall x-scheme-handler/aucapture",
-                        RedirectStandardOutput = true,
-                        UseShellExecute = false,
-                        CreateNoWindow = true,
-                    }
-                };
-                
-                xdgproc.Start(); 
-                xdgproc.WaitForExit();
-            }
         }
 
         public override async Task<bool> SendToken(string jsonText)
