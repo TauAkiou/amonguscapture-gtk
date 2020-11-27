@@ -1,0 +1,32 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net5.0</TargetFramework>
+        <RootNamespace>AUCapture_GTK</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Include="../AmongUsCapture/Icon.ico" />
+    </ItemGroup>
+    
+    <ItemGroup>
+      <Compile Update="GTK\PrimaryWindow.Definitions.cs">
+        <DependentUpon>PrimaryWindow.cs</DependentUpon>
+      </Compile>
+      <Compile Update="GTK\PrimaryWindow.Initialization.cs">
+        <DependentUpon>PrimaryWindow.cs</DependentUpon>
+      </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Config.Net" Version="4.15.0" />
+      <PackageReference Include="Config.Net.Json" Version="4.15.0" />
+      <PackageReference Include="GtkSharp" Version="3.22.25.128" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\AmongUsCapture\AmongUsCapture.csproj" />
+    </ItemGroup>
+
+</Project>
