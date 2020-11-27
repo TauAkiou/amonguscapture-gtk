@@ -18,7 +18,7 @@ namespace AmongUsCapture.TextColorLibrary
         {
             return FromColor(tColor);
         }
-
+        
         private static Color HexToColor(string Hex)
         {
             var newHex = Hex.IndexOf('#') == 0 ? Hex.Substring(1) : Hex;
