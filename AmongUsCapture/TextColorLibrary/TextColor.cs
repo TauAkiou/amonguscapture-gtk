@@ -5,8 +5,16 @@ using System.Linq;
 
 namespace AmongUsCapture.TextColorLibrary
 {
+    public enum ColorFormat
+    {
+        Default = 0,
+        WPF = 1,
+        Pango = 2
+    }
+    
     public static class TextColor
     {
+        public static ColorFormat CFormat;
         private static char colorIndicator = '§'; //Represent color codes as §FFFFFF (6 Letters, Hex decode)
 
         private static string FromColor(Color textColor)
@@ -17,6 +25,11 @@ namespace AmongUsCapture.TextColorLibrary
         public static string ToTextColor(this Color tColor)
         {
             return FromColor(tColor);
+        }
+
+        public static string ToPangoColor(this Color tColor, string writestring)
+        {
+            return $"<span foreground=\"#{tColor.R.ToString("X2")}{tColor.G.ToString("X2")}{tColor.B.ToString("X2")}\">{writestring}</span>";
         }
         
         private static Color HexToColor(string Hex)
@@ -35,6 +48,7 @@ namespace AmongUsCapture.TextColorLibrary
             red = Math.Clamp(red, 0, 255);
             green = Math.Clamp(green, 0, 255);
             blue = Math.Clamp(blue, 0, 255);
+            
             return colorIndicator + red.ToString("X2") + green.ToString("X2") + blue.ToString("X2");
         }
 
