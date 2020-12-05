@@ -120,7 +120,7 @@ namespace AmongUsCapture
             {
                 Name = librarypath.Split('/').Last().Trim(), // Make sure hidden characters aren't there.
                 BaseAddress = (IntPtr) addr_start,
-                FileName = librarypath,
+                FileName = librarypath.Trim(),
                 MemorySize = memsize,
                 EntryPointAddress = IntPtr.Zero
             });

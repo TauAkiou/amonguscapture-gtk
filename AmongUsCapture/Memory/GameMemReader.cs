@@ -2,10 +2,16 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
+using System.IO;
+using System.Net;
+using System.Net.Mime;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography;
+using System.Text;
 using AmongUsCapture.TextColorLibrary;
 using GLib;
 using Gtk;
+using Newtonsoft.Json.Linq;
 using Thread = System.Threading.Thread;
 
 namespace AmongUsCapture
@@ -24,6 +30,8 @@ namespace AmongUsCapture
         private static readonly GameMemReader instance = new GameMemReader();
         private readonly IGameOffsets _gameOffsets = Settings.GameOffsets;
         private bool exileCausesEnd;
+        
+        private static string Hash = Settings.GameOffsets.GameHash;
 
         private bool shouldReadLobby = false;
         private IntPtr GameAssemblyPtr = IntPtr.Zero;
@@ -107,7 +115,21 @@ namespace AmongUsCapture
 
                                         GameAssemblyPtr = module.BaseAddress;
                                         
-                                        
+                                        using (SHA256Managed sha256 = new SHA256Managed()) {
+                                            using (FileStream fs = new FileStream(module.FileName, FileMode.Open,
+                                                FileAccess.Read)) {
+                                                using (var bs = new BufferedStream(fs)) {
+                                                    var hash = sha256.ComputeHash(bs);
+                                                    StringBuilder GameAssemblyhashSb = new StringBuilder(2 * hash.Length);
+                                                    foreach (byte byt in hash) {
+                                                        GameAssemblyhashSb.AppendFormat("{0:X2}", byt);
+                                                    }
+
+                                                    Hash = GameAssemblyhashSb.ToString();
+                                                    generateOffsets();
+                                                }
+                                            }
+                                        }
                                         
                                         
                                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
@@ -506,7 +528,36 @@ namespace AmongUsCapture
         {
             shouldForceTransmitState = true;
         }
+        
+        public void generateOffsets() {
+            WebClient client = new WebClient();
+
+            dynamic AmongUsData = JObject.Parse(client.DownloadString("https://crewmate.xyz/json"));
+
+            if (GameMemReader.Hash == null) return;
+            
+            string Version = AmongUsData[GameMemReader.Hash].Version;
+
+            string AmongUsClientOffset = AmongUsData[GameMemReader.Hash].AmongUsClientOffset;
+            string GameDataOffset = AmongUsData[GameMemReader.Hash].GameDataOffset;
+            string MeetingHudOffset = AmongUsData[GameMemReader.Hash].MeetingHudOffset;
+            string GameStartManagerOffset = AmongUsData[GameMemReader.Hash].GameStartManagerOffset;
+            string HudManagerOffset = AmongUsData[GameMemReader.Hash].HudManagerOffset;
+            string ServerManagerOffset = AmongUsData[GameMemReader.Hash].ServerManagerOffset;
+
+
+            Settings.GameOffsets.AmongUsClientOffset = Convert.ToInt32(AmongUsClientOffset, 16);
+            Settings.GameOffsets.GameDataOffset = Convert.ToInt32(GameDataOffset, 16);
+            Settings.GameOffsets.MeetingHudOffset = Convert.ToInt32(MeetingHudOffset, 16);
+            Settings.GameOffsets.GameStartManagerOffset = Convert.ToInt32(GameStartManagerOffset, 16);
+            Settings.GameOffsets.HudManagerOffset = Convert.ToInt32(HudManagerOffset, 16);
+            Settings.GameOffsets.ServerManagerOffset = Convert.ToInt32(ServerManagerOffset, 16);
+        }
+        
     }
+    
+    
+    
 
     public class GameStateChangedEventArgs : EventArgs
     {
