@@ -106,6 +106,10 @@ namespace AmongUsCapture
                                             $"Game Version Check: {(invalidversion ? Color.Red.ToTextColorPango("FAIL") : Color.Lime.ToTextColorPango("PASS"))}");
 
                                         GameAssemblyPtr = module.BaseAddress;
+                                        
+                                        
+                                        
+                                        
                                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&
                                             !GameVerifier.VerifySteamHash(module.FileName))
                                         {

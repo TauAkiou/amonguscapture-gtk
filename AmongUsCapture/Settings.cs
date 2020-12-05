@@ -40,25 +40,25 @@ namespace AmongUsCapture
         //Types allowed: bool, double, int, long, string, TimeSpan, DateTime, Uri, Guid
         //DateTime is always converted to UTC
         
-        [Option(Alias = "GameHash", DefaultValue = "74C7DF9C5C722CC641018880F29F2C4C8F52C0720DFC808FD0060D0E7552F192")]
+        [Option(Alias = "GameHash", DefaultValue = "5ab7b3419ed29af0728e66ae8f1a207aedd6456280128060fedf74621b287be6")]
         string GameHash { get; }
         
-        [Option(Alias = "Offsets.Client", DefaultValue = 0x144BB30)]
+        [Option(Alias = "Offsets.Client", DefaultValue = 0x193C154)]
         int AmongUsClientOffset { get; set; }
         
-        [Option(Alias = "Offsets.GameData", DefaultValue = 0x144BA30)]
+        [Option(Alias = "Offsets.GameData", DefaultValue = 0x193C054)]
         int GameDataOffset { get; set; }
         
-        [Option(Alias = "Offsets.MeetingHud", DefaultValue = 0x144B7CC)]
+        [Option(Alias = "Offsets.MeetingHud", DefaultValue = 0x193BA9C)]
         int MeetingHudOffset { get; set; }
         
-        [Option(Alias = "Offsets.GameStartManager", DefaultValue = 0x13A715C)]
+        [Option(Alias = "Offsets.GameStartManager", DefaultValue = 0x1858970)]
         int GameStartManagerOffset { get; set; }
         
-        [Option(Alias = "Offsets.HudManager", DefaultValue = 0x139B29C)]
+        [Option(Alias = "Offsets.HudManager", DefaultValue = 0x1849100)]
         int HudManagerOffset { get; set; }
         
-        [Option(Alias = "Offsets.ServerManager", DefaultValue = 0x139CF7c)]
+        [Option(Alias = "Offsets.ServerManager", DefaultValue = 0x184C230)]
         int ServerManagerOffset { get; set; }
     }
 }
