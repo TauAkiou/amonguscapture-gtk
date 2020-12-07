@@ -5,6 +5,7 @@ using System.Drawing;
 using System.IO;
 using System.Net;
 using System.Net.Mime;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -101,18 +102,6 @@ namespace AmongUsCapture
                                 foreach (var module in ProcessMemory.getInstance().modules)
                                     if (module.Name.Equals("GameAssembly.dll", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        if (!GameVerifier.VerifyGameHash(module.FileName))
-                                        {
-                                            invalidversion = true;
-                                        }
-                                        else
-                                        {
-                                            invalidversion = false;
-                                        }
-
-                                        Settings.conInterface.WriteModuleTextColored("GameVerifier", Color.Red,
-                                            $"Game Version Check: {(invalidversion ? Color.Red.ToTextColorPango("FAIL") : Color.Lime.ToTextColorPango("PASS"))}");
-
                                         GameAssemblyPtr = module.BaseAddress;
                                         
                                         using (SHA256Managed sha256 = new SHA256Managed()) {
@@ -126,10 +115,24 @@ namespace AmongUsCapture
                                                     }
 
                                                     Hash = GameAssemblyhashSb.ToString();
+                                                    Settings.GameOffsets.GameHash = Hash;
                                                     generateOffsets();
                                                 }
                                             }
                                         }
+                                     
+                                        if (!GameVerifier.VerifyGameHash(module.FileName))
+                                        {
+                                            invalidversion = true;
+                                        }
+                                        else
+                                        {
+                                            invalidversion = false;
+                                        }
+
+                                        Settings.conInterface.WriteModuleTextColored("GameVerifier", Color.Red,
+                                            $"Game Version Check: {(invalidversion ? Color.Red.ToTextColorPango("FAIL") : Color.Lime.ToTextColorPango("PASS"))}");
+
                                         
                                         
                                         if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) &&

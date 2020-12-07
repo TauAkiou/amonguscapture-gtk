@@ -39,10 +39,10 @@ namespace AmongUsCapture
     {
         //Types allowed: bool, double, int, long, string, TimeSpan, DateTime, Uri, Guid
         //DateTime is always converted to UTC
-        
+
         [Option(Alias = "GameHash", DefaultValue = "5ab7b3419ed29af0728e66ae8f1a207aedd6456280128060fedf74621b287be6")]
-        string GameHash { get; }
-        
+        string GameHash { get; set; }
+
         [Option(Alias = "Offsets.Client", DefaultValue = 0x193C154)]
         int AmongUsClientOffset { get; set; }
         
