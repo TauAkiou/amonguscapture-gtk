@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Runtime.InteropServices;
 using System.Drawing;
 using System.IO;
 using System.Reflection;
@@ -16,7 +17,15 @@ namespace AmongUsCapture.ConsoleTypes
         public FormConsole(UserForm userForm)
         {
             form = userForm;
-            var directoryuri = Assembly.GetEntryAssembly().GetName().CodeBase.Substring(7);
+            string directoryuri = null;
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) {
+                directoryuri = Assembly.GetEntryAssembly().GetName().CodeBase.Substring(7);
+            }
+            else
+            {
+                directoryuri = Assembly.GetEntryAssembly().GetName().CodeBase.Substring(8);
+
+            }
             logFile = File.CreateText(Path.Combine(Directory.GetParent(directoryuri).ToString(), "CaptureLog.txt"));
         }
 
