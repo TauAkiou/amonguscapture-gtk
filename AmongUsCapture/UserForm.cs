@@ -67,6 +67,8 @@ namespace AmongUsCapture
             GameMemReader.getInstance().ChatMessageAdded += OnChatMessageAdded;
             GameMemReader.getInstance().JoinedLobby += OnJoinedLobby;
             GameMemReader.getInstance().GameVersionUnverified += _eventGameIsUnverified;
+
+
             
             // Load URL
             _urlHostEntryField.Text = Settings.PersistentSettings.host;
@@ -83,7 +85,14 @@ namespace AmongUsCapture
             var xdg_file = System.IO.Path.Join(xdg_path, "aucapture-opener.desktop");
 
             var skippingHandler = Settings.PersistentSettings.skipHandlerInstall;
-            
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            {
+                // Windows doesn't support this. Skip the handler automatically and deactivate the button.
+                skippingHandler = true; 
+                _primaryWindowInstallLinkHandler.Sensitive = false;
+            }
+
             if (!File.Exists(xdg_file) && !skippingHandler)
             {
                 // Activate the button if we aren't skipping the handler install.
