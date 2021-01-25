@@ -37,6 +37,8 @@ While you can use amonguscapture-gtk under Windows, we recommend using the [offi
 * .NET Core 3.1 Runtime: https://dotnet.microsoft.com/download/dotnet-core/current/runtime
 * GTK For Windows Runtime: https://github.com/tschoonj/GTK-for-Windows-Runtime-Environment-Installer
 
+amonguscapture-gtk is a GTK3 app. Remember to choose the gtk3 installer when downloading the runtime.
+
 ### Linux:
 
 * .NET Core 3.1: https://docs.microsoft.com/en-us/dotnet/core/install/linux
