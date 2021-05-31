@@ -142,8 +142,6 @@ namespace AmongUsCapture
                     if (args.ResponseId == ResponseType.Accept)
                     {
                         GameMemReader.getInstance().cracked = false;
-                        GameMemReader.getInstance().invalidversion = false;
-                        GameMemReader.getInstance().paused = false;
                     }
                 };
                 

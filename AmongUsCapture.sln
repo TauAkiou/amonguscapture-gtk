@@ -5,6 +5,8 @@ VisualStudioVersion = 16.0.29806.167
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AmongUsCapture", "AmongUsCapture\AmongUsCapture.csproj", "{72CF81BF-8BB3-4D4C-A642-C45865F9A72F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AUOffsetManager", "AUOffsetManager\AUOffsetManager.csproj", "{9F18BC64-8919-4AC4-9A04-D880CFC1AD8B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{72CF81BF-8BB3-4D4C-A642-C45865F9A72F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{72CF81BF-8BB3-4D4C-A642-C45865F9A72F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{72CF81BF-8BB3-4D4C-A642-C45865F9A72F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F18BC64-8919-4AC4-9A04-D880CFC1AD8B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9F18BC64-8919-4AC4-9A04-D880CFC1AD8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9F18BC64-8919-4AC4-9A04-D880CFC1AD8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9F18BC64-8919-4AC4-9A04-D880CFC1AD8B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
