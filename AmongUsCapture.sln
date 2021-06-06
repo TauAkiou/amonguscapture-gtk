@@ -21,6 +21,7 @@ Global
 		{9F18BC64-8919-4AC4-9A04-D880CFC1AD8B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9F18BC64-8919-4AC4-9A04-D880CFC1AD8B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9F18BC64-8919-4AC4-9A04-D880CFC1AD8B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9F18BC64-8919-4AC4-9A04-D880CFC1AD8B}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
