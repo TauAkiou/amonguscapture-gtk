@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
@@ -6,8 +6,9 @@ using System.Text;
 
 namespace AmongUsCapture
 {
-    public class ProcessMemoryWindows : ProcessMemory
+ public class ProcessMemoryWindows : ProcessMemory
     {
+
         public override bool HookProcess(string name)
         {
             if (!IsHooked)
@@ -26,6 +27,8 @@ namespace AmongUsCapture
                     }
                 }
             }
+
+            IsHooked = process != null && !process.HasExited;
             return IsHooked;
         }
 
@@ -89,12 +92,12 @@ namespace AmongUsCapture
             }
         }
 
-        public override string ReadString(IntPtr address)
+        public override string ReadString(IntPtr address, int lengthOffset = 0x8, int rawOffset = 0xC)
         {
             if (process == null || address == IntPtr.Zero)
                 return default;
-            int stringLength = Read<int>(address + 0x8);
-            byte[] rawString = Read(address + 0xC, stringLength << 1);
+            int stringLength = Read<int>(address + lengthOffset);
+            byte[] rawString = Read(address + rawOffset, stringLength << 1);
             return System.Text.Encoding.Unicode.GetString(rawString);
         }
 
@@ -109,7 +112,7 @@ namespace AmongUsCapture
             return ints;
         }
 
-        private byte[] Read(IntPtr address, int numBytes)
+        public override byte[] Read(IntPtr address, int numBytes)
         {
             byte[] buffer = new byte[numBytes];
             if (process == null || address == IntPtr.Zero)
@@ -118,7 +121,7 @@ namespace AmongUsCapture
             WinAPI.ReadProcessMemory(process.Handle, address, buffer, numBytes, out int bytesRead);
             return buffer;
         }
-        private int OffsetAddress(ref IntPtr address, params int[] offsets)
+        public override int OffsetAddress(ref IntPtr address, params int[] offsets)
         {
             byte[] buffer = new byte[is64Bit ? 8 : 4];
             for (int i = 0; i < offsets.Length - 1; i++)

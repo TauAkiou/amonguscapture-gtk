@@ -1,12 +1,13 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
-using System.Text.RegularExpressions;
+using System.Text;
 
 namespace AmongUsCapture
 {
+
     public abstract class ProcessMemory
     {
         private static ProcessMemory instance;
@@ -29,18 +30,19 @@ namespace AmongUsCapture
             }
             return instance;
         }
-        
-        protected bool is64Bit;
+        public bool is64Bit;
         public Process process;
         public List<Module> modules;
-        public bool IsHooked => process != null && !process.HasExited;
+        public bool IsHooked { get; protected set; }
         public abstract bool HookProcess(string name);
         public abstract void LoadModules();
         public abstract T Read<T>(IntPtr address, params int[] offsets) where T : unmanaged;
+        public abstract byte[] Read(IntPtr address, int numBytes);
         public abstract T ReadWithDefault<T>(IntPtr address, T defaultparam, params int[] offsets) where T : unmanaged;
 
-        public abstract string ReadString(IntPtr address);
+        public abstract string ReadString(IntPtr address, int lengthOffset = 0x8, int rawOffset = 0xC);
         public abstract IntPtr[] ReadArray(IntPtr address, int size);
+        public abstract int OffsetAddress(ref IntPtr address, params int[] offsets);
 
         public class Module
         {
@@ -61,37 +63,6 @@ namespace AmongUsCapture
             public IntPtr BaseAddress;
             public uint ModuleSize;
             public IntPtr EntryPoint;
-        }
-
-        public class CaptureMemoryException : Exception
-        {
-            public CaptureErrorCode ErrorCode { get; }
-
-            public CaptureMemoryException()
-            {
-                ErrorCode = CaptureErrorCode.Unknown;
-            }
-
-            public CaptureMemoryException(string message) : base(message)
-            {
-                ErrorCode = CaptureErrorCode.Unknown;
-            }
-
-            public CaptureMemoryException(CaptureErrorCode ecode)
-            {
-                ErrorCode = ecode;
-            }
-
-            public CaptureMemoryException(string message, CaptureErrorCode ecode) : base(message)
-            {
-                ErrorCode = ecode;
-            }
-        }
-
-        public enum CaptureErrorCode
-        {
-            Unknown = 1,
-            InsufficientPermissions = 2
         }
     }
 }

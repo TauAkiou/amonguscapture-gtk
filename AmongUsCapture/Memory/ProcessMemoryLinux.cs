@@ -5,8 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
-using Castle.DynamicProxy;
-
 
 namespace AmongUsCapture
 {
@@ -51,6 +49,7 @@ namespace AmongUsCapture
                             is64Bit = flag;
 
                             LoadModules();
+
                         }
 
                     }
@@ -124,6 +123,7 @@ namespace AmongUsCapture
                 MemorySize = memsize,
                 EntryPointAddress = IntPtr.Zero
             });
+            IsHooked = true;
 
         }
 
@@ -155,12 +155,12 @@ namespace AmongUsCapture
             }
         }
 
-        public override string ReadString(IntPtr address)
+        public override string ReadString(IntPtr address, int lengthOffset = 0x8, int rawOffset = 0xC)
         {
             if (process == null || address == IntPtr.Zero)
                 return default;
-            int stringLength = Read<int>(address + 0x8);
-            byte[] rawString = Read(address + 0xC, stringLength << 1);
+            int stringLength = Read<int>(address + lengthOffset);
+            byte[] rawString = Read(address + rawOffset, stringLength << 1);
             return Encoding.Unicode.GetString(rawString);
         }
 
@@ -181,11 +181,9 @@ namespace AmongUsCapture
          *
          * This is because to read and store, Linux uses 'iovec' C structs to provide the base pointer
          * and length of the information being read.
-         *
-         * Fortunately, these pointers can be reused, though they have to live in the unmanaged memory space. 
-         */
-        
-        private int OffsetAddress(ref IntPtr address, params int[] offsets)
+         * */
+
+        public override int OffsetAddress(ref IntPtr address, params int[] offsets)
         {
             byte[] buffer = new byte[is64Bit ? 8 : 4];
             IntPtr buffer_marshal;
@@ -218,21 +216,7 @@ namespace AmongUsCapture
                 Marshal.StructureToPtr(local, local_ptr, true);
                 Marshal.StructureToPtr(remote, remote_ptr, true);
 
-                var readstatus = LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
-                if (readstatus < 0)
-                {
-                    var errorno = Marshal.GetLastWin32Error();
-                    
-                    Marshal.FreeHGlobal(local_ptr);
-                    Marshal.FreeHGlobal(remote_ptr);
-                    Marshal.FreeHGlobal(buffer_marshal);
-                    
-                    if (errorno == 1)
-                    {
-                        throw new CaptureMemoryException(CaptureErrorCode.InsufficientPermissions);
-                    }
-                    throw new CaptureMemoryException(CaptureErrorCode.Unknown);
-                }
+                LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
 
                 Marshal.Copy(local.iov_base, buffer, 0, buffer.Length);
                 
@@ -251,7 +235,7 @@ namespace AmongUsCapture
             return offsets.Length > 0 ? offsets[offsets.Length - 1] : 0;
         }
 
-        private byte[] Read(IntPtr address, int numBytes)
+        public override byte[] Read(IntPtr address, int numBytes)
         {
             byte[] buffer = new byte[numBytes];
 
@@ -284,20 +268,7 @@ namespace AmongUsCapture
             Marshal.StructureToPtr(local, local_ptr, true);
             Marshal.StructureToPtr(remote, remote_ptr, true);
 
-            var readstatus = LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
-            if (readstatus < 0)
-            {
-                Marshal.FreeHGlobal(local_ptr);
-                Marshal.FreeHGlobal(remote_ptr);
-                Marshal.FreeHGlobal(buffer_marshal);
-
-                var errorno = Marshal.GetLastWin32Error();
-                if (errorno == 1)
-                {
-                    throw new CaptureMemoryException(CaptureErrorCode.InsufficientPermissions);
-                }
-                throw new CaptureMemoryException(CaptureErrorCode.Unknown);
-            }
+            LinuxAPI.process_vm_readv(process.Id, local_ptr, 1, remote_ptr, 1, 0);
 
             Marshal.Copy(local.iov_base, buffer, 0, numBytes);
 
@@ -319,18 +290,8 @@ namespace AmongUsCapture
 
     public static class LinuxAPI
     {
-        // This should, in theory, import the correct libc lib regardless of distro.
-        // If we can't load it in the future, we may need to find a new library entry point.
-        //
-        // https://man7.org/linux/man-pages/man2/process_vm_readv.2.html
-        
         [DllImport("libc", SetLastError = true)]
         public static extern int process_vm_readv(int pid, IntPtr local_iov, ulong liovcnt, IntPtr remote_iov,
             ulong riovcnt, ulong flags);
-        
-        [DllImport("libc", SetLastError = true)]
-        private static extern int chmod(string pathname, int mode);
     }
-
-
 }

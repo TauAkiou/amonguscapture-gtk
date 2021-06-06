@@ -33,6 +33,10 @@ namespace AmongUsCapture
         
         [Option(Alias = "SkipHandlerInstall", DefaultValue = false)]
         bool skipHandlerInstall { get; set; }
+        
+        [Option(Alias = "IndexURL", DefaultValue = "https://raw.githubusercontent.com/automuteus/amonguscapture/master/Offsets.json")]
+        string IndexURL { get; set; }
+
     }
 
     public interface IGameOffsets
